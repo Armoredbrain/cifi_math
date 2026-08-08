@@ -201,10 +201,11 @@ class PresetManager {
 // ==========================================
 // 1. RP CALCULATOR MODULE
 // ==========================================
-if (document.getElementById('studyDuration')) {
+if (document.getElementById('tickTime')) {
     const inputs = {
-        duration: document.getElementById('studyDuration'),
-        durationUnit: document.getElementById('durationUnit'),
+        tickTime: document.getElementById('tickTime'),
+        tickUnit: document.getElementById('tickUnit'),
+        ticksPerStudy: document.getElementById('ticksPerStudy'),
         rpGain: document.getElementById('rpPerStudy'),
         rpRateUnit: document.getElementById('rpRateUnit'),
         rpObjective: document.getElementById('rpObjective')
@@ -219,9 +220,12 @@ if (document.getElementById('studyDuration')) {
     const presetMgr = new PresetManager('rp_calc', inputs, calculateRP);
 
     function calculateRP() {
-        const rawDuration = parseBigInput(inputs.duration.value);
-        const durationMult = parseFloat(inputs.durationUnit.value);
-        const secPerStudy = rawDuration * durationMult;
+        const rawTickTime = parseBigInput(inputs.tickTime.value);
+        const tickMult = parseFloat(inputs.tickUnit.value);
+        const secPerTick = rawTickTime * tickMult;
+
+        const ticksPerStudy = parseBigInput(inputs.ticksPerStudy.value);
+        const secPerStudy = secPerTick * ticksPerStudy;
 
         const rawRpGain = parseBigInput(inputs.rpGain.value);
         const rateType = inputs.rpRateUnit.value;
@@ -263,7 +267,7 @@ if (document.getElementById('studyDuration')) {
 // ==========================================
 // 2. SHARD CALCULATOR MODULE
 // ==========================================
-if (document.getElementById('tickTime')) {
+if (document.getElementById('opTicks')) {
     const inputs = {
         tickTime: document.getElementById('tickTime'),
         tickUnit: document.getElementById('tickUnit'),
