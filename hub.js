@@ -42,16 +42,26 @@ function deleteCustomPage(index) {
 function renderPages() {
     const pages = getCustomPages();
     
+    // Default built-in pages
     pagesList.innerHTML = `
         <a href="rp_calculator.html" class="page-card">
             <div class="page-info">
                 <span class="page-title">RP Grind Calculator</span>
-                <span class="page-desc">Big number calculator with custom rates and presets</span>
+                <span class="page-desc">Big number RP time calculator with custom rates and presets</span>
+            </div>
+            <span>➔</span>
+        </a>
+
+        <a href="shard_calculator.html" class="page-card">
+            <div class="page-info">
+                <span class="page-title">Shard Grind Calculator</span>
+                <span class="page-desc">Calculates tick-based operation and cooldown grind times</span>
             </div>
             <span>➔</span>
         </a>
     `;
 
+    // Append custom pages added by user
     pages.forEach((p, idx) => {
         const container = document.createElement('div');
         container.style.display = 'flex';
@@ -81,5 +91,8 @@ function renderPages() {
     });
 }
 
-addPageBtn.addEventListener('click', addCustomPage);
+if (addPageBtn) {
+    addPageBtn.addEventListener('click', addCustomPage);
+}
+
 renderPages();
