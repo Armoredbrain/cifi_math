@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>RP Grind Calculator</title>
-    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="style.css?v=3">
 </head>
 <body>
 
@@ -15,14 +15,21 @@
     </div>
 
     <div class="input-group">
-        <label for="studyDuration">Study Duration</label>
+        <label for="tickTime">Tick Time Duration</label>
         <div class="input-row">
-            <input type="text" id="studyDuration" value="35">
-            <select id="durationUnit">
+            <input type="text" id="tickTime" value="1">
+            <select id="tickUnit">
                 <option value="1">Seconds</option>
+                <option value="0.001">Milliseconds (ms)</option>
                 <option value="60">Minutes</option>
-                <option value="3600">Hours</option>
             </select>
+        </div>
+    </div>
+
+    <div class="input-group">
+        <label for="ticksPerStudy">Ticks per Study</label>
+        <div class="input-row">
+            <input type="text" id="ticksPerStudy" value="35">
         </div>
     </div>
 
@@ -78,6 +85,6 @@
     </div>
 </div>
 
-<script src="calculator.js"></script>
+<script src="calculator.js?v=3"></script>
 </body>
 </html>
