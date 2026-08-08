@@ -1,17 +1,6 @@
-const durationInput = document.getElementById('studyDuration');
-const durationUnit = document.getElementById('durationUnit');
-const rpGainInput = document.getElementById('rpPerStudy');
-const rpRateUnit = document.getElementById('rpRateUnit');
-const rpObjInput = document.getElementById('rpObjective');
-
-const studiesOutput = document.getElementById('studiesNeeded');
-const timeFormattedOutput = document.getElementById('timeFormatted');
-const hoursOutput = document.getElementById('totalHours');
-
-const presetNameInput = document.getElementById('presetName');
-const saveBtn = document.getElementById('saveBtn');
-const savedList = document.getElementById('savedList');
-
+// ==========================================
+// SHARED UTILITIES
+// ==========================================
 const SUFFIXES = {
     'k': 1e3, 'm': 1e6, 'b': 1e9, 't': 1e12,
     'qa': 1e15, 'qu': 1e18, 'sx': 1e21, 'sp': 1e24,
@@ -64,45 +53,9 @@ function formatBigNumber(num) {
     return num.toLocaleString('en-US', { maximumFractionDigits: 2 });
 }
 
-function calculate() {
-    const rawDuration = parseBigInput(durationInput.value);
-    const durationMult = parseFloat(durationUnit.value);
-    const secPerStudy = rawDuration * durationMult;
-
-    const rawRpGain = parseBigInput(rpGainInput.value);
-    const rateType = rpRateUnit.value;
-
-    const totalTargetRP = parseBigInput(rpObjInput.value);
-
-    saveLastState();
-
-    if (secPerStudy <= 0 || rawRpGain <= 0 || totalTargetRP <= 0) {
-        studiesOutput.textContent = '0';
-        timeFormattedOutput.textContent = '0d 0h 0m 0s';
-        hoursOutput.textContent = '0 hrs';
-        return;
-    }
-
-    let rpPerStudyCalculated = rawRpGain;
-
-    if (rateType === 'min') {
-        rpPerStudyCalculated = (rawRpGain / 60) * secPerStudy;
-    } else if (rateType === 'hr') {
-        rpPerStudyCalculated = (rawRpGain / 3600) * secPerStudy;
-    } else if (rateType === 'day') {
-        rpPerStudyCalculated = (rawRpGain / 86400) * secPerStudy;
-    }
-
-    const studiesNeeded = totalTargetRP / rpPerStudyCalculated;
-    const totalSeconds = studiesNeeded * secPerStudy;
-
-    studiesOutput.textContent = formatBigNumber(Math.ceil(studiesNeeded));
-
-    if (!isFinite(totalSeconds)) {
-        timeFormattedOutput.textContent = 'Too large to calculate';
-        hoursOutput.textContent = 'Infinity hrs';
-        return;
-    }
+function formatTime(totalSeconds) {
+    if (!isFinite(totalSeconds)) return 'Too large to calculate';
+    if (totalSeconds <= 0) return '0d 0h 0m 0s';
 
     const years = Math.floor(totalSeconds / (86400 * 365));
     let remSec = totalSeconds % (86400 * 365);
@@ -121,119 +74,249 @@ function calculate() {
     if (days > 0 || years > 0) formattedStr += `${days}d `;
     formattedStr += `${hours}h ${minutes}m ${seconds}s`;
 
-    timeFormattedOutput.textContent = formattedStr;
-    hoursOutput.textContent = `${formatBigNumber(totalSeconds / 3600)} hrs`;
+    return formattedStr;
 }
 
-function saveLastState() {
-    try {
-        const state = {
-            duration: durationInput.value,
-            durationUnit: durationUnit.value,
-            rpGain: rpGainInput.value,
-            rpRateUnit: rpRateUnit.value,
-            rpObjective: rpObjInput.value
-        };
-        localStorage.setItem('rp_calc_last_state', JSON.stringify(state));
-    } catch (e) {}
-}
+// Preset Storage Helper
+class PresetManager {
+    constructor(storageKey, inputs, onCalculate) {
+        this.storageKey = storageKey;
+        this.inputs = inputs;
+        this.onCalculate = onCalculate;
+        
+        this.presetNameInput = document.getElementById('presetName');
+        this.saveBtn = document.getElementById('saveBtn');
+        this.savedList = document.getElementById('savedList');
 
-function loadLastState() {
-    try {
-        const last = localStorage.getItem('rp_calc_last_state');
-        if (last) {
-            const state = JSON.parse(last);
-            if (state.duration !== undefined) durationInput.value = state.duration;
-            if (state.durationUnit !== undefined) durationUnit.value = state.durationUnit;
-            if (state.rpGain !== undefined) rpGainInput.value = state.rpGain;
-            if (state.rpRateUnit !== undefined) rpRateUnit.value = state.rpRateUnit;
-            if (state.rpObjective !== undefined) rpObjInput.value = state.rpObjective;
+        if (this.saveBtn) {
+            this.saveBtn.addEventListener('click', () => this.savePreset());
         }
-    } catch (e) {}
-}
+    }
 
-function getPresets() {
-    try {
-        return JSON.parse(localStorage.getItem('rp_calc_presets') || '{}');
-    } catch (e) {
-        return {};
+    saveLastState() {
+        try {
+            const state = {};
+            for (let key in this.inputs) {
+                state[key] = this.inputs[key].value;
+            }
+            localStorage.setItem(`${this.storageKey}_last_state`, JSON.stringify(state));
+        } catch (e) {}
+    }
+
+    loadLastState() {
+        try {
+            const last = localStorage.getItem(`${this.storageKey}_last_state`);
+            if (last) {
+                const state = JSON.parse(last);
+                for (let key in this.inputs) {
+                    if (state[key] !== undefined) {
+                        this.inputs[key].value = state[key];
+                    }
+                }
+            }
+        } catch (e) {}
+    }
+
+    getPresets() {
+        try {
+            return JSON.parse(localStorage.getItem(`${this.storageKey}_presets`) || '{}');
+        } catch (e) {
+            return {};
+        }
+    }
+
+    savePreset() {
+        const name = this.presetNameInput.value.trim() || 'Preset ' + (Object.keys(this.getPresets()).length + 1);
+        const presets = this.getPresets();
+
+        const state = {};
+        for (let key in this.inputs) {
+            state[key] = this.inputs[key].value;
+        }
+
+        presets[name] = state;
+
+        try {
+            localStorage.setItem(`${this.storageKey}_presets`, JSON.stringify(presets));
+        } catch (e) {}
+
+        this.presetNameInput.value = '';
+        this.renderPresets();
+    }
+
+    loadPreset(name) {
+        const presets = this.getPresets();
+        if (presets[name]) {
+            const p = presets[name];
+            for (let key in this.inputs) {
+                if (p[key] !== undefined) {
+                    this.inputs[key].value = p[key];
+                }
+            }
+            this.onCalculate();
+        }
+    }
+
+    deletePreset(name) {
+        const presets = this.getPresets();
+        delete presets[name];
+        try {
+            localStorage.setItem(`${this.storageKey}_presets`, JSON.stringify(presets));
+        } catch (e) {}
+        this.renderPresets();
+    }
+
+    renderPresets() {
+        if (!this.savedList) return;
+        const presets = this.getPresets();
+        this.savedList.innerHTML = '';
+
+        Object.keys(presets).forEach(name => {
+            const item = document.createElement('div');
+            item.className = 'saved-item';
+
+            const loadBtn = document.createElement('button');
+            loadBtn.className = 'btn btn-load';
+            loadBtn.textContent = name;
+            loadBtn.onclick = () => this.loadPreset(name);
+
+            const delBtn = document.createElement('button');
+            delBtn.className = 'btn btn-danger';
+            delBtn.textContent = '✕';
+            delBtn.onclick = () => this.deletePreset(name);
+
+            item.appendChild(loadBtn);
+            item.appendChild(delBtn);
+            this.savedList.appendChild(item);
+        });
+    }
+
+    init() {
+        this.loadLastState();
+        this.renderPresets();
     }
 }
 
-function savePreset() {
-    const name = presetNameInput.value.trim() || 'Preset ' + (Object.keys(getPresets()).length + 1);
-    const presets = getPresets();
 
-    presets[name] = {
-        duration: durationInput.value,
-        durationUnit: durationUnit.value,
-        rpGain: rpGainInput.value,
-        rpRateUnit: rpRateUnit.value,
-        rpObjective: rpObjInput.value
+// ==========================================
+// 1. RP CALCULATOR MODULE
+// ==========================================
+if (document.getElementById('studyDuration')) {
+    const inputs = {
+        duration: document.getElementById('studyDuration'),
+        durationUnit: document.getElementById('durationUnit'),
+        rpGain: document.getElementById('rpPerStudy'),
+        rpRateUnit: document.getElementById('rpRateUnit'),
+        rpObjective: document.getElementById('rpObjective')
     };
 
-    try {
-        localStorage.setItem('rp_calc_presets', JSON.stringify(presets));
-    } catch (e) {}
+    const outputs = {
+        studiesNeeded: document.getElementById('studiesNeeded'),
+        timeFormatted: document.getElementById('timeFormatted'),
+        totalHours: document.getElementById('totalHours')
+    };
 
-    presetNameInput.value = '';
-    renderPresets();
-}
+    const presetMgr = new PresetManager('rp_calc', inputs, calculateRP);
 
-function loadPreset(name) {
-    const presets = getPresets();
-    if (presets[name]) {
-        const p = presets[name];
-        durationInput.value = p.duration;
-        durationUnit.value = p.durationUnit;
-        rpGainInput.value = p.rpGain;
-        rpRateUnit.value = p.rpRateUnit;
-        rpObjInput.value = p.rpObjective;
-        calculate();
+    function calculateRP() {
+        const rawDuration = parseBigInput(inputs.duration.value);
+        const durationMult = parseFloat(inputs.durationUnit.value);
+        const secPerStudy = rawDuration * durationMult;
+
+        const rawRpGain = parseBigInput(inputs.rpGain.value);
+        const rateType = inputs.rpRateUnit.value;
+        const totalTargetRP = parseBigInput(inputs.rpObjective.value);
+
+        presetMgr.saveLastState();
+
+        if (secPerStudy <= 0 || rawRpGain <= 0 || totalTargetRP <= 0) {
+            outputs.studiesNeeded.textContent = '0';
+            outputs.timeFormatted.textContent = '0d 0h 0m 0s';
+            outputs.totalHours.textContent = '0 hrs';
+            return;
+        }
+
+        let rpPerStudyCalculated = rawRpGain;
+        if (rateType === 'min') rpPerStudyCalculated = (rawRpGain / 60) * secPerStudy;
+        else if (rateType === 'hr') rpPerStudyCalculated = (rawRpGain / 3600) * secPerStudy;
+        else if (rateType === 'day') rpPerStudyCalculated = (rawRpGain / 86400) * secPerStudy;
+
+        const studiesNeeded = totalTargetRP / rpPerStudyCalculated;
+        const totalSeconds = studiesNeeded * secPerStudy;
+
+        outputs.studiesNeeded.textContent = formatBigNumber(Math.ceil(studiesNeeded));
+        outputs.timeFormatted.textContent = formatTime(totalSeconds);
+        outputs.totalHours.textContent = `${formatBigNumber(totalSeconds / 3600)} hrs`;
     }
-}
 
-function deletePreset(name) {
-    const presets = getPresets();
-    delete presets[name];
-    try {
-        localStorage.setItem('rp_calc_presets', JSON.stringify(presets));
-    } catch (e) {}
-    renderPresets();
-}
-
-function renderPresets() {
-    const presets = getPresets();
-    savedList.innerHTML = '';
-
-    Object.keys(presets).forEach(name => {
-        const item = document.createElement('div');
-        item.className = 'saved-item';
-
-        const loadBtn = document.createElement('button');
-        loadBtn.className = 'btn btn-load';
-        loadBtn.textContent = name;
-        loadBtn.onclick = () => loadPreset(name);
-
-        const delBtn = document.createElement('button');
-        delBtn.className = 'btn btn-danger';
-        delBtn.textContent = '✕';
-        delBtn.onclick = () => deletePreset(name);
-
-        item.appendChild(loadBtn);
-        item.appendChild(delBtn);
-        savedList.appendChild(item);
+    Object.values(inputs).forEach(el => {
+        el.addEventListener('keyup', calculateRP);
+        el.addEventListener('input', calculateRP);
+        el.addEventListener('change', calculateRP);
     });
+
+    presetMgr.init();
+    calculateRP();
 }
 
-saveBtn.addEventListener('click', savePreset);
 
-[durationInput, durationUnit, rpGainInput, rpRateUnit, rpObjInput].forEach(el => {
-    el.addEventListener('keyup', calculate);
-    el.addEventListener('input', calculate);
-    el.addEventListener('change', calculate);
-});
+// ==========================================
+// 2. SHARD CALCULATOR MODULE
+// ==========================================
+if (document.getElementById('tickTime')) {
+    const inputs = {
+        tickTime: document.getElementById('tickTime'),
+        tickUnit: document.getElementById('tickUnit'),
+        opTicks: document.getElementById('opTicks'),
+        waitTicks: document.getElementById('waitTicks'),
+        shardGain: document.getElementById('shardGain'),
+        shardObjective: document.getElementById('shardObjective')
+    };
 
-loadLastState();
-renderPresets();
-calculate();
+    const outputs = {
+        opsNeeded: document.getElementById('opsNeeded'),
+        timeFormatted: document.getElementById('timeFormatted'),
+        totalHours: document.getElementById('totalHours')
+    };
+
+    const presetMgr = new PresetManager('shard_calc', inputs, calculateShards);
+
+    function calculateShards() {
+        const rawTickTime = parseBigInput(inputs.tickTime.value);
+        const tickMult = parseFloat(inputs.tickUnit.value);
+        const secPerTick = rawTickTime * tickMult;
+
+        const opTicks = parseBigInput(inputs.opTicks.value);
+        const waitTicks = parseBigInput(inputs.waitTicks.value);
+        const shardGain = parseBigInput(inputs.shardGain.value);
+        const shardObjective = parseBigInput(inputs.shardObjective.value);
+
+        presetMgr.saveLastState();
+
+        const totalTicksPerOpCycle = opTicks + waitTicks;
+
+        if (secPerTick <= 0 || totalTicksPerOpCycle <= 0 || shardGain <= 0 || shardObjective <= 0) {
+            outputs.opsNeeded.textContent = '0';
+            outputs.timeFormatted.textContent = '0d 0h 0m 0s';
+            outputs.totalHours.textContent = '0 hrs';
+            return;
+        }
+
+        const opsNeeded = shardObjective / shardGain;
+        const totalTicks = opsNeeded * totalTicksPerOpCycle;
+        const totalSeconds = totalTicks * secPerTick;
+
+        outputs.opsNeeded.textContent = formatBigNumber(Math.ceil(opsNeeded));
+        outputs.timeFormatted.textContent = formatTime(totalSeconds);
+        outputs.totalHours.textContent = `${formatBigNumber(totalSeconds / 3600)} hrs`;
+    }
+
+    Object.values(inputs).forEach(el => {
+        el.addEventListener('keyup', calculateShards);
+        el.addEventListener('input', calculateShards);
+        el.addEventListener('change', calculateShards);
+    });
+
+    presetMgr.init();
+    calculateShards();
+}
