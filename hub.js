@@ -3,6 +3,20 @@ const pageFileInput = document.getElementById('newPageFile');
 const addPageBtn = document.getElementById('addPageBtn');
 const pagesList = document.getElementById('pagesList');
 
+// Default built-in calculators
+const BUILT_IN_PAGES = [
+    {
+        title: "RP Grind Calculator",
+        desc: "Big number RP time calculator with custom rates and presets",
+        file: "rp_calculator.html"
+    },
+    {
+        title: "Shard Grind Calculator",
+        desc: "Calculates tick-based operation and cooldown grind times",
+        file: "shard_calculator.html"
+    }
+];
+
 function getCustomPages() {
     try {
         return JSON.parse(localStorage.getItem('hub_custom_pages') || '[]');
@@ -40,29 +54,26 @@ function deleteCustomPage(index) {
 }
 
 function renderPages() {
-    const pages = getCustomPages();
-    
-    // Default built-in pages
-    pagesList.innerHTML = `
-        <a href="rp_calculator.html" class="page-card">
+    pagesList.innerHTML = '';
+
+    // 1. Render Built-in Pages
+    BUILT_IN_PAGES.forEach(p => {
+        const a = document.createElement('a');
+        a.className = 'page-card';
+        a.href = p.file;
+        a.innerHTML = `
             <div class="page-info">
-                <span class="page-title">RP Grind Calculator</span>
-                <span class="page-desc">Big number RP time calculator with custom rates and presets</span>
+                <span class="page-title">${p.title}</span>
+                <span class="page-desc">${p.desc}</span>
             </div>
             <span>➔</span>
-        </a>
+        `;
+        pagesList.appendChild(a);
+    });
 
-        <a href="shard_calculator.html" class="page-card">
-            <div class="page-info">
-                <span class="page-title">Shard Grind Calculator</span>
-                <span class="page-desc">Calculates tick-based operation and cooldown grind times</span>
-            </div>
-            <span>➔</span>
-        </a>
-    `;
-
-    // Append custom pages added by user
-    pages.forEach((p, idx) => {
+    // 2. Render User Custom Pages
+    const customPages = getCustomPages();
+    customPages.forEach((p, idx) => {
         const container = document.createElement('div');
         container.style.display = 'flex';
         container.style.gap = '6px';
