@@ -1,0 +1,253 @@
+:root {
+    --bg-color: #0f172a;
+    --card-bg: #1e293b;
+    --accent: #38bdf8;
+    --danger: #ef4444;
+    --text-main: #f8fafc;
+    --text-muted: #94a3b8;
+    --input-bg: #334155;
+    --border: #475569;
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    background-color: var(--bg-color);
+    color: var(--text-main);
+    margin: 0;
+    padding: 20px;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    min-height: 100vh;
+    box-sizing: border-box;
+}
+
+.container {
+    background-color: var(--card-bg);
+    border-radius: 16px;
+    padding: 24px;
+    width: 100%;
+    max-width: 440px;
+    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3);
+    border: 1px solid var(--border);
+}
+
+.header-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.back-btn {
+    color: var(--accent);
+    text-decoration: none;
+    font-size: 0.9rem;
+    font-weight: 600;
+}
+
+h2 {
+    margin: 0 0 20px 0;
+    font-size: 1.3rem;
+    color: var(--accent);
+    text-align: center;
+}
+
+.header-row h2 {
+    margin: 0;
+}
+
+.input-group {
+    margin-bottom: 16px;
+}
+
+label {
+    display: block;
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    margin-bottom: 6px;
+    font-weight: 500;
+}
+
+.input-row {
+    display: flex;
+    gap: 8px;
+}
+
+input, select {
+    padding: 12px;
+    background-color: var(--input-bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    color: var(--text-main);
+    font-size: 1rem;
+    box-sizing: border-box;
+    outline: none;
+    transition: border-color 0.2s;
+}
+
+input {
+    flex: 1;
+    min-width: 0;
+}
+
+select {
+    font-size: 0.9rem;
+    cursor: pointer;
+}
+
+input:focus, select:focus {
+    border-color: var(--accent);
+}
+
+.btn {
+    background-color: var(--accent);
+    color: var(--bg-color);
+    border: none;
+    padding: 12px;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    width: 100%;
+    font-size: 0.95rem;
+    transition: opacity 0.2s;
+}
+
+.btn:active {
+    opacity: 0.8;
+}
+
+.btn-danger {
+    background-color: var(--danger);
+    color: white;
+    padding: 8px 12px;
+    width: auto;
+    font-size: 0.8rem;
+}
+
+.btn-load {
+    background-color: var(--input-bg);
+    color: var(--text-main);
+    border: 1px solid var(--border);
+    padding: 8px 12px;
+    font-size: 0.85rem;
+    flex: 1;
+    text-align: left;
+}
+
+/* Page Listing / Hub */
+.pages-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.page-card {
+    background-color: var(--input-bg);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 14px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    text-decoration: none;
+    color: var(--text-main);
+    transition: border-color 0.2s;
+}
+
+.page-card:hover {
+    border-color: var(--accent);
+}
+
+.page-info {
+    display: flex;
+    flex-direction: column;
+}
+
+.page-title {
+    font-weight: 600;
+    font-size: 1rem;
+    color: var(--accent);
+}
+
+.page-desc {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    margin-top: 2px;
+}
+
+/* Calculator Specifics */
+.results {
+    margin-top: 24px;
+    padding-top: 20px;
+    border-top: 1px solid var(--border);
+}
+
+.result-main {
+    text-align: center;
+    margin-bottom: 16px;
+}
+
+.result-main .label {
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    margin-bottom: 4px;
+}
+
+.result-main .value {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--accent);
+    word-break: break-word;
+}
+
+.result-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+    background-color: var(--input-bg);
+    padding: 12px;
+    border-radius: 8px;
+    font-size: 0.9rem;
+}
+
+.result-sub-item {
+    text-align: center;
+    word-break: break-word;
+}
+
+.result-sub-item .sub-label {
+    color: var(--text-muted);
+    font-size: 0.75rem;
+    margin-bottom: 2px;
+}
+
+.result-sub-item .sub-val {
+    font-weight: 600;
+}
+
+.save-section {
+    margin-top: 20px;
+    padding-top: 16px;
+    border-top: 1px solid var(--border);
+}
+
+.saved-list {
+    margin-top: 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.saved-item {
+    display: flex;
+    gap: 6px;
+    align-items: center;
+}
+
+.hint {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    text-align: center;
+    margin-top: 16px;
+}
