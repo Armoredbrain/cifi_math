@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RP Grind Calculator</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div class="container">
+    <div class="header-row">
+        <a href="index.html" class="back-btn">← Hub</a>
+        <h2>RP Calculator</h2>
+    </div>
+
+    <div class="input-group">
+        <label for="studyDuration">Study Duration</label>
+        <div class="input-row">
+            <input type="text" id="studyDuration" value="35">
+            <select id="durationUnit">
+                <option value="1">Seconds</option>
+                <option value="60">Minutes</option>
+                <option value="3600">Hours</option>
+            </select>
+        </div>
+    </div>
+
+    <div class="input-group">
+        <label for="rpPerStudy">RP Gain Rate</label>
+        <div class="input-row">
+            <input type="text" id="rpPerStudy" value="0.10">
+            <select id="rpRateUnit">
+                <option value="1">Per Study</option>
+                <option value="min">Per Minute</option>
+                <option value="hr">Per Hour</option>
+                <option value="day">Per Day</option>
+            </select>
+        </div>
+    </div>
+
+    <div class="input-group">
+        <label for="rpObjective">RP Target Objective</label>
+        <div class="input-row">
+            <input type="text" id="rpObjective" value="50">
+        </div>
+    </div>
+
+    <div class="results">
+        <div class="result-main">
+            <div class="label">Total Time Required</div>
+            <div class="value" id="timeFormatted">0d 0h 0m 0s</div>
+        </div>
+
+        <div class="result-grid">
+            <div class="result-sub-item">
+                <div class="sub-label">Studies Needed</div>
+                <div class="sub-val" id="studiesNeeded">0</div>
+            </div>
+            <div class="result-sub-item">
+                <div class="sub-label">Total Hours</div>
+                <div class="sub-val" id="totalHours">0.00 hrs</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="save-section">
+        <label>Presets & Saved States</label>
+        <div class="input-row">
+            <input type="text" id="presetName" placeholder="Preset name (e.g. Tier 1)">
+            <button class="btn" id="saveBtn" style="width: 100px;">Save</button>
+        </div>
+        <div class="saved-list" id="savedList"></div>
+    </div>
+
+    <div class="hint">
+        Supports inputs like: 10m, 5b, 2.5qa, 1e34
+    </div>
+</div>
+
+<script>
+    const durationInput = document.getElementById('studyDuration');
+    const durationUnit = document.getElementById('durationUnit');
+    const rpGainInput = document.getElementById('rpPerStudy');
+    const rpRateUnit = document.getElementById('rpRateUnit');
+    const rpObjInput = document.getElementById('rpObjective');
+
+    const studiesOutput = document.getElementById('studiesNeeded');
+    const timeFormattedOutput = document.getElementById('timeFormatted');
+    const hoursOutput = document.getElementById('totalHours');
+
+    const presetNameInput = document.getElementById('presetName');
+    const saveBtn = document.getElementById('saveBtn');
+    const savedList = document.getElementById('savedList');
+
+    const SUFFIXES = {
+        'k': 1e3, 'm': 1e6, 'b': 1e9, 't': 1e12,
+        'qa': 1e15, 'qu': 1e18, 'sx': 1e21, 'sp': 1e24,
+        'o': 1e27, 'n': 1e30, 'd': 1e33
+    };
+
+    function parseBigInput(str) {
+        if (!str) return 0;
+        str = str.toString().trim().toLowerCase();
+        
+        if (/^[\d.]+(e[+-]?\d+)$/.test(str)) {
+            const val = parseFloat(str);
+            return isNaN(val) ? 0 : val;
+        }
+
+        const match = str.match(/^([\d.]+)\s*([a-z]+)?$/);
+        if (match) {
+            const num = parseFloat(match[1]);
+            const suf = match[2];
+            if (isNaN(num)) return 0;
+
+            if (suf && SUFFIXES[suf] !== undefined) {
+                return num * SUFFIXES[suf];
+            }
+            return num;
+        }
+
+        const val = parseFloat(str);
+        return isNaN(val) ? 0 : val;
+    }
+
+    function formatBigNumber(num) {
+        if (num === 0) return '0';
+        if (!isFinite(num)) return 'Infinity';
+
+        const abs = Math.abs(num);
+
+        if (abs >= 1e36 || (abs < 0.001 && abs > 0)) {
+            return num.toExponential(3);
+        }
+
+        const keys = Object.keys(SUFFIXES).reverse();
+        for (let suf of keys) {
+            const val = SUFFIXES[suf];
+            if (abs >= val) {
+                return (num / val).toFixed(2).replace(/\.00$/, '') + ' ' + suf.toUpperCase();
+            }
+        }
+
+        return num.toLocaleString('en-US', { maximumFractionDigits: 2 });
+    }
+
+    function calculate() {
+        const rawDuration = parseBigInput(durationInput.value);
+        const durationMult = parseFloat(durationUnit.value);
+        const secPerStudy = rawDuration * durationMult;
+
+        const rawRpGain = parseBigInput(rpGainInput.value);
+        const rateType = rpRateUnit.value;
+
+        const totalTargetRP = parseBigInput(rpObjInput.value);
+
+        saveLastState();
+
+        if (secPerStudy <= 0 || rawRpGain <= 0 || totalTargetRP <= 0) {
+            studiesOutput.textContent = '0';
+            timeFormattedOutput.textContent = '0d 0h 0m 0s';
+            hoursOutput.textContent = '0 hrs';
+            return;
+        }
+
+        let rpPerStudyCalculated = rawRpGain;
+
+        if (rateType === 'min') {
+            rpPerStudyCalculated = (rawRpGain / 60) * secPerStudy;
+        } else if (rateType === 'hr') {
+            rpPerStudyCalculated = (rawRpGain / 3600) * secPerStudy;
+        } else if (rateType === 'day') {
+            rpPerStudyCalculated = (rawRpGain / 86400) * secPerStudy;
+        }
+
+        const studiesNeeded = totalTargetRP / rpPerStudyCalculated;
+        const totalSeconds = studiesNeeded * secPerStudy;
+
+        studiesOutput.textContent = formatBigNumber(Math.ceil(studiesNeeded));
+
+        if (!isFinite(totalSeconds)) {
+            timeFormattedOutput.textContent = 'Too large to calculate';
+            hoursOutput.textContent = 'Infinity hrs';
+            return;
+        }
+
+        const years = Math.floor(totalSeconds / (86400 * 365));
+        let remSec = totalSeconds % (86400 * 365);
+
+        const days = Math.floor(remSec / 86400);
+        remSec %= 86400;
+
+        const hours = Math.floor(remSec / 3600);
+        remSec %= 3600;
+
+        const minutes = Math.floor(remSec / 60);
+        const seconds = Math.round(remSec % 60);
+
+        let formattedStr = '';
+        if (years > 0) formattedStr += `${formatBigNumber(years)}y `;
+        if (days > 0 || years > 0) formattedStr += `${days}d `;
+        formattedStr += `${hours}h ${minutes}m ${seconds}s`;
+
+        timeFormattedOutput.textContent = formattedStr;
+        hoursOutput.textContent = `${formatBigNumber(totalSeconds / 3600)} hrs`;
+    }
+
+    function saveLastState() {
+        try {
+            const state = {
+                duration: durationInput.value,
+                durationUnit: durationUnit.value,
+                rpGain: rpGainInput.value,
+                rpRateUnit: rpRateUnit.value,
+                rpObjective: rpObjInput.value
+            };
+            localStorage.setItem('rp_calc_last_state', JSON.stringify(state));
+        } catch (e) {}
+    }
+
+    function loadLastState() {
+        try {
+            const last = localStorage.getItem('rp_calc_last_state');
+            if (last) {
+                const state = JSON.parse(last);
+                if (state.duration !== undefined) durationInput.value = state.duration;
+                if (state.durationUnit !== undefined) durationUnit.value = state.durationUnit;
+                if (state.rpGain !== undefined) rpGainInput.value = state.rpGain;
+                if (state.rpRateUnit !== undefined) rpRateUnit.value = state.rpRateUnit;
+                if (state.rpObjective !== undefined) rpObjInput.value = state.rpObjective;
+            }
+        } catch (e) {}
+    }
+
+    function getPresets() {
+        try {
+            return JSON.parse(localStorage.getItem('rp_calc_presets') || '{}');
+        } catch (e) {
+            return {};
+        }
+    }
+
+    function savePreset() {
+        const name = presetNameInput.value.trim() || 'Preset ' + (Object.keys(getPresets()).length + 1);
+        const presets = getPresets();
+
+        presets[name] = {
+            duration: durationInput.value,
+            durationUnit: durationUnit.value,
+            rpGain: rpGainInput.value,
+            rpRateUnit: rpRateUnit.value,
+            rpObjective: rpObjInput.value
+        };
+
+        try {
+            localStorage.setItem('rp_calc_presets', JSON.stringify(presets));
+        } catch (e) {}
+
+        presetNameInput.value = '';
+        renderPresets();
+    }
+
+    function loadPreset(name) {
+        const presets = getPresets();
+        if (presets[name]) {
+            const p = presets[name];
+            durationInput.value = p.duration;
+            durationUnit.value = p.durationUnit;
+            rpGainInput.value = p.rpGain;
+            rpRateUnit.value = p.rpRateUnit;
+            rpObjInput.value = p.rpObjective;
+            calculate();
+        }
+    }
+
+    function deletePreset(name) {
+        const presets = getPresets();
+        delete presets[name];
+        try {
+            localStorage.setItem('rp_calc_presets', JSON.stringify(presets));
+        } catch (e) {}
+        renderPresets();
+    }
+
+    function renderPresets() {
+        const presets = getPresets();
+        savedList.innerHTML = '';
+
+        Object.keys(presets).forEach(name => {
+            const item = document.createElement('div');
+            item.className = 'saved-item';
+
+            const loadBtn = document.createElement('button');
+            loadBtn.className = 'btn btn-load';
+            loadBtn.textContent = name;
+            loadBtn.onclick = () => loadPreset(name);
+
+            const delBtn = document.createElement('button');
+            delBtn.className = 'btn btn-danger';
+            delBtn.textContent = '✕';
+            delBtn.onclick = () => deletePreset(name);
+
+            item.appendChild(loadBtn);
+            item.appendChild(delBtn);
+            savedList.appendChild(item);
+        });
+    }
+
+    saveBtn.addEventListener('click', savePreset);
+
+    [durationInput, durationUnit, rpGainInput, rpRateUnit, rpObjInput].forEach(el => {
+        el.addEventListener('keyup', calculate);
+        el.addEventListener('input', calculate);
+        el.addEventListener('change', calculate);
+    });
+
+    loadLastState();
+    renderPresets();
+    calculate();
+</script>
+
+</body>
+</html>
