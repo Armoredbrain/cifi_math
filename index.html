@@ -3,518 +3,122 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>RP Time Calculator</title>
-    <style>
-        :root {
-            --bg-color: #0f172a;
-            --card-bg: #1e293b;
-            --accent: #38bdf8;
-            --danger: #ef4444;
-            --text-main: #f8fafc;
-            --text-muted: #94a3b8;
-            --input-bg: #334155;
-            --border: #475569;
-        }
-
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-            background-color: var(--bg-color);
-            color: var(--text-main);
-            margin: 0;
-            padding: 20px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-            box-sizing: border-box;
-        }
-
-        .container {
-            background-color: var(--card-bg);
-            border-radius: 16px;
-            padding: 24px;
-            width: 100%;
-            max-width: 420px;
-            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3);
-            border: 1px solid var(--border);
-        }
-
-        h2 {
-            margin-top: 0;
-            margin-bottom: 20px;
-            font-size: 1.4rem;
-            text-align: center;
-            color: var(--accent);
-        }
-
-        .input-group {
-            margin-bottom: 16px;
-        }
-
-        label {
-            display: block;
-            font-size: 0.85rem;
-            color: var(--text-muted);
-            margin-bottom: 6px;
-            font-weight: 500;
-        }
-
-        .input-row {
-            display: flex;
-            gap: 8px;
-        }
-
-        input, select {
-            padding: 12px;
-            background-color: var(--input-bg);
-            border: 1px solid var(--border);
-            border-radius: 8px;
-            color: var(--text-main);
-            font-size: 1rem;
-            box-sizing: border-box;
-            outline: none;
-            transition: border-color 0.2s;
-        }
-
-        input {
-            flex: 1;
-            min-width: 0;
-        }
-
-        select {
-            font-size: 0.9rem;
-            cursor: pointer;
-        }
-
-        input:focus, select:focus {
-            border-color: var(--accent);
-        }
-
-        .results {
-            margin-top: 24px;
-            padding-top: 20px;
-            border-top: 1px solid var(--border);
-        }
-
-        .result-main {
-            text-align: center;
-            margin-bottom: 16px;
-        }
-
-        .result-main .label {
-            font-size: 0.85rem;
-            color: var(--text-muted);
-            margin-bottom: 4px;
-        }
-
-        .result-main .value {
-            font-size: 1.5rem;
-            font-weight: 700;
-            color: var(--accent);
-            word-break: break-word;
-        }
-
-        .result-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 8px;
-            background-color: var(--input-bg);
-            padding: 12px;
-            border-radius: 8px;
-            font-size: 0.9rem;
-        }
-
-        .result-sub-item {
-            text-align: center;
-            word-break: break-word;
-        }
-
-        .result-sub-item .sub-label {
-            color: var(--text-muted);
-            font-size: 0.75rem;
-            margin-bottom: 2px;
-        }
-
-        .result-sub-item .sub-val {
-            font-weight: 600;
-        }
-
-        .save-section {
-            margin-top: 20px;
-            padding-top: 16px;
-            border-top: 1px solid var(--border);
-        }
-
-        .btn {
-            background-color: var(--accent);
-            color: var(--bg-color);
-            border: none;
-            padding: 12px;
-            border-radius: 8px;
-            font-weight: 600;
-            cursor: pointer;
-            width: 100%;
-            font-size: 0.95rem;
-            transition: opacity 0.2s;
-        }
-
-        .btn:active {
-            opacity: 0.8;
-        }
-
-        .btn-danger {
-            background-color: var(--danger);
-            color: white;
-            padding: 8px 12px;
-            width: auto;
-            font-size: 0.8rem;
-        }
-
-        .btn-load {
-            background-color: var(--input-bg);
-            color: var(--text-main);
-            border: 1px solid var(--border);
-            padding: 8px 12px;
-            font-size: 0.85rem;
-            flex: 1;
-            text-align: left;
-        }
-
-        .saved-list {
-            margin-top: 12px;
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-        }
-
-        .saved-item {
-            display: flex;
-            gap: 6px;
-            align-items: center;
-        }
-
-        .hint {
-            font-size: 0.75rem;
-            color: var(--text-muted);
-            text-align: center;
-            margin-top: 16px;
-        }
-    </style>
+    <title>Toolbox Hub</title>
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
 <div class="container">
-    <h2>RP Grind Calculator</h2>
+    <h2>Toolbox Hub</h2>
 
-    <div class="input-group">
-        <label for="studyDuration">Study Duration</label>
-        <div class="input-row">
-            <input type="text" id="studyDuration" value="35">
-            <select id="durationUnit">
-                <option value="1">Seconds</option>
-                <option value="60">Minutes</option>
-                <option value="3600">Hours</option>
-            </select>
-        </div>
-    </div>
-
-    <div class="input-group">
-        <label for="rpPerStudy">RP Gain Rate</label>
-        <div class="input-row">
-            <input type="text" id="rpPerStudy" value="0.10">
-            <select id="rpRateUnit">
-                <option value="1">Per Study</option>
-                <option value="min">Per Minute</option>
-                <option value="hr">Per Hour</option>
-                <option value="day">Per Day</option>
-            </select>
-        </div>
-    </div>
-
-    <div class="input-group">
-        <label for="rpObjective">RP Target Objective</label>
-        <div class="input-row">
-            <input type="text" id="rpObjective" value="50">
-        </div>
-    </div>
-
-    <div class="results">
-        <div class="result-main">
-            <div class="label">Total Time Required</div>
-            <div class="value" id="timeFormatted">0d 0h 0m 0s</div>
-        </div>
-
-        <div class="result-grid">
-            <div class="result-sub-item">
-                <div class="sub-label">Studies Needed</div>
-                <div class="sub-val" id="studiesNeeded">0</div>
+    <div class="pages-list" id="pagesList">
+        <a href="rp_calculator.html" class="page-card">
+            <div class="page-info">
+                <span class="page-title">RP Grind Calculator</span>
+                <span class="page-desc">Big number calculator with custom rates and presets</span>
             </div>
-            <div class="result-sub-item">
-                <div class="sub-label">Total Hours</div>
-                <div class="sub-val" id="totalHours">0.00 hrs</div>
+            <span>➔</span>
+        </a>
+    </div>
+
+    <div class="save-section" style="margin-top: 24px;">
+        <label>Link Another Tool File</label>
+        <div class="input-group">
+            <input type="text" id="newPageTitle" placeholder="Page Title (e.g. Stat Calculator)" style="margin-bottom: 8px; width: 100%;">
+            <div class="input-row">
+                <input type="text" id="newPageFile" placeholder="Filename (e.g. stats.html)">
+                <button class="btn" id="addPageBtn" style="width: 80px;">Add</button>
             </div>
         </div>
-    </div>
-
-    <div class="save-section">
-        <label>Presets & Saved States</label>
-        <div class="input-row">
-            <input type="text" id="presetName" placeholder="Preset name (e.g. Tier 1)">
-            <button class="btn" id="saveBtn" style="width: 100px;">Save</button>
-        </div>
-        <div class="saved-list" id="savedList"></div>
-    </div>
-
-    <div class="hint">
-        Supports inputs like: 10m, 5b, 2.5qa, 1e34
     </div>
 </div>
 
 <script>
-    const durationInput = document.getElementById('studyDuration');
-    const durationUnit = document.getElementById('durationUnit');
-    const rpGainInput = document.getElementById('rpPerStudy');
-    const rpRateUnit = document.getElementById('rpRateUnit');
-    const rpObjInput = document.getElementById('rpObjective');
+    const pageTitleInput = document.getElementById('newPageTitle');
+    const pageFileInput = document.getElementById('newPageFile');
+    const addPageBtn = document.getElementById('addPageBtn');
+    const pagesList = document.getElementById('pagesList');
 
-    const studiesOutput = document.getElementById('studiesNeeded');
-    const timeFormattedOutput = document.getElementById('timeFormatted');
-    const hoursOutput = document.getElementById('totalHours');
-
-    const presetNameInput = document.getElementById('presetName');
-    const saveBtn = document.getElementById('saveBtn');
-    const savedList = document.getElementById('savedList');
-
-    const SUFFIXES = {
-        'k': 1e3, 'm': 1e6, 'b': 1e9, 't': 1e12,
-        'qa': 1e15, 'qu': 1e18, 'sx': 1e21, 'sp': 1e24,
-        'o': 1e27, 'n': 1e30, 'd': 1e33
-    };
-
-    function parseBigInput(str) {
-        if (!str) return 0;
-        str = str.toString().trim().toLowerCase();
-        
-        // Scientific notation
-        if (/^[\d.]+(e[+-]?\d+)$/.test(str)) {
-            const val = parseFloat(str);
-            return isNaN(val) ? 0 : val;
-        }
-
-        // Short scale suffix matching
-        const match = str.match(/^([\d.]+)\s*([a-z]+)?$/);
-        if (match) {
-            const num = parseFloat(match[1]);
-            const suf = match[2];
-            if (isNaN(num)) return 0;
-
-            if (suf && SUFFIXES[suf] !== undefined) {
-                return num * SUFFIXES[suf];
-            }
-            return num;
-        }
-
-        const val = parseFloat(str);
-        return isNaN(val) ? 0 : val;
-    }
-
-    function formatBigNumber(num) {
-        if (num === 0) return '0';
-        if (!isFinite(num)) return 'Infinity';
-
-        const abs = Math.abs(num);
-
-        if (abs >= 1e36 || (abs < 0.001 && abs > 0)) {
-            return num.toExponential(3);
-        }
-
-        const keys = Object.keys(SUFFIXES).reverse();
-        for (let suf of keys) {
-            const val = SUFFIXES[suf];
-            if (abs >= val) {
-                return (num / val).toFixed(2).replace(/\.00$/, '') + ' ' + suf.toUpperCase();
-            }
-        }
-
-        return num.toLocaleString('en-US', { maximumFractionDigits: 2 });
-    }
-
-    function calculate() {
-        const rawDuration = parseBigInput(durationInput.value);
-        const durationMult = parseFloat(durationUnit.value);
-        const secPerStudy = rawDuration * durationMult;
-
-        const rawRpGain = parseBigInput(rpGainInput.value);
-        const rateType = rpRateUnit.value;
-
-        const totalTargetRP = parseBigInput(rpObjInput.value);
-
-        saveLastState();
-
-        if (secPerStudy <= 0 || rawRpGain <= 0 || totalTargetRP <= 0) {
-            studiesOutput.textContent = '0';
-            timeFormattedOutput.textContent = '0d 0h 0m 0s';
-            hoursOutput.textContent = '0 hrs';
-            return;
-        }
-
-        let rpPerStudyCalculated = rawRpGain;
-
-        if (rateType === 'min') {
-            rpPerStudyCalculated = (rawRpGain / 60) * secPerStudy;
-        } else if (rateType === 'hr') {
-            rpPerStudyCalculated = (rawRpGain / 3600) * secPerStudy;
-        } else if (rateType === 'day') {
-            rpPerStudyCalculated = (rawRpGain / 86400) * secPerStudy;
-        }
-
-        const studiesNeeded = totalTargetRP / rpPerStudyCalculated;
-        const totalSeconds = studiesNeeded * secPerStudy;
-
-        studiesOutput.textContent = formatBigNumber(Math.ceil(studiesNeeded));
-
-        if (!isFinite(totalSeconds)) {
-            timeFormattedOutput.textContent = 'Too large to calculate';
-            hoursOutput.textContent = 'Infinity hrs';
-            return;
-        }
-
-        const years = Math.floor(totalSeconds / (86400 * 365));
-        let remSec = totalSeconds % (86400 * 365);
-
-        const days = Math.floor(remSec / 86400);
-        remSec %= 86400;
-
-        const hours = Math.floor(remSec / 3600);
-        remSec %= 3600;
-
-        const minutes = Math.floor(remSec / 60);
-        const seconds = Math.round(remSec % 60);
-
-        let formattedStr = '';
-        if (years > 0) formattedStr += `${formatBigNumber(years)}y `;
-        if (days > 0 || years > 0) formattedStr += `${days}d `;
-        formattedStr += `${hours}h ${minutes}m ${seconds}s`;
-
-        timeFormattedOutput.textContent = formattedStr;
-        hoursOutput.textContent = `${formatBigNumber(totalSeconds / 3600)} hrs`;
-    }
-
-    // --- LOCAL STORAGE SYSTEM ---
-
-    function saveLastState() {
+    function getCustomPages() {
         try {
-            const state = {
-                duration: durationInput.value,
-                durationUnit: durationUnit.value,
-                rpGain: rpGainInput.value,
-                rpRateUnit: rpRateUnit.value,
-                rpObjective: rpObjInput.value
-            };
-            localStorage.setItem('rp_calc_last_state', JSON.stringify(state));
-        } catch (e) {}
-    }
-
-    function loadLastState() {
-        try {
-            const last = localStorage.getItem('rp_calc_last_state');
-            if (last) {
-                const state = JSON.parse(last);
-                if (state.duration !== undefined) durationInput.value = state.duration;
-                if (state.durationUnit !== undefined) durationUnit.value = state.durationUnit;
-                if (state.rpGain !== undefined) rpGainInput.value = state.rpGain;
-                if (state.rpRateUnit !== undefined) rpRateUnit.value = state.rpRateUnit;
-                if (state.rpObjective !== undefined) rpObjInput.value = state.rpObjective;
-            }
-        } catch (e) {}
-    }
-
-    function getPresets() {
-        try {
-            return JSON.parse(localStorage.getItem('rp_calc_presets') || '{}');
+            return JSON.parse(localStorage.getItem('hub_custom_pages') || '[]');
         } catch (e) {
-            return {};
+            return [];
         }
     }
 
-    function savePreset() {
-        const name = presetNameInput.value.trim() || 'Preset ' + (Object.keys(getPresets()).length + 1);
-        const presets = getPresets();
+    function addCustomPage() {
+        const title = pageTitleInput.value.trim();
+        let file = pageFileInput.value.trim();
 
-        presets[name] = {
-            duration: durationInput.value,
-            durationUnit: durationUnit.value,
-            rpGain: rpGainInput.value,
-            rpRateUnit: rpRateUnit.value,
-            rpObjective: rpObjInput.value
-        };
+        if (!title || !file) return;
+        if (!file.endsWith('.html')) file += '.html';
+
+        const pages = getCustomPages();
+        pages.push({ title, file });
 
         try {
-            localStorage.setItem('rp_calc_presets', JSON.stringify(presets));
+            localStorage.setItem('hub_custom_pages', JSON.stringify(pages));
         } catch (e) {}
 
-        presetNameInput.value = '';
-        renderPresets();
+        pageTitleInput.value = '';
+        pageFileInput.value = '';
+        renderPages();
     }
 
-    function loadPreset(name) {
-        const presets = getPresets();
-        if (presets[name]) {
-            const p = presets[name];
-            durationInput.value = p.duration;
-            durationUnit.value = p.durationUnit;
-            rpGainInput.value = p.rpGain;
-            rpRateUnit.value = p.rpRateUnit;
-            rpObjInput.value = p.rpObjective;
-            calculate();
-        }
-    }
-
-    function deletePreset(name) {
-        const presets = getPresets();
-        delete presets[name];
+    function deleteCustomPage(index) {
+        const pages = getCustomPages();
+        pages.splice(index, 1);
         try {
-            localStorage.setItem('rp_calc_presets', JSON.stringify(presets));
+            localStorage.setItem('hub_custom_pages', JSON.stringify(pages));
         } catch (e) {}
-        renderPresets();
+        renderPages();
     }
 
-    function renderPresets() {
-        const presets = getPresets();
-        savedList.innerHTML = '';
+    function renderPages() {
+        const pages = getCustomPages();
+        
+        pagesList.innerHTML = `
+            <a href="rp_calculator.html" class="page-card">
+                <div class="page-info">
+                    <span class="page-title">RP Grind Calculator</span>
+                    <span class="page-desc">Big number calculator with custom rates and presets</span>
+                </div>
+                <span>➔</span>
+            </a>
+        `;
 
-        Object.keys(presets).forEach(name => {
-            const item = document.createElement('div');
-            item.className = 'saved-item';
+        pages.forEach((p, idx) => {
+            const container = document.createElement('div');
+            container.style.display = 'flex';
+            container.style.gap = '6px';
+            container.style.alignItems = 'center';
 
-            const loadBtn = document.createElement('button');
-            loadBtn.className = 'btn btn-load';
-            loadBtn.textContent = name;
-            loadBtn.onclick = () => loadPreset(name);
+            const a = document.createElement('a');
+            a.className = 'page-card';
+            a.href = p.file;
+            a.style.flex = '1';
+            a.innerHTML = `
+                <div class="page-info">
+                    <span class="page-title">${p.title}</span>
+                    <span class="page-desc">${p.file}</span>
+                </div>
+                <span>➔</span>
+            `;
 
             const delBtn = document.createElement('button');
             delBtn.className = 'btn btn-danger';
             delBtn.textContent = '✕';
-            delBtn.onclick = () => deletePreset(name);
+            delBtn.onclick = () => deleteCustomPage(idx);
 
-            item.appendChild(loadBtn);
-            item.appendChild(delBtn);
-            savedList.appendChild(item);
+            container.appendChild(a);
+            container.appendChild(delBtn);
+            pagesList.appendChild(container);
         });
     }
 
-    saveBtn.addEventListener('click', savePreset);
-
-    [durationInput, durationUnit, rpGainInput, rpRateUnit, rpObjInput].forEach(el => {
-        el.addEventListener('keyup', calculate);
-        el.addEventListener('input', calculate);
-        el.addEventListener('change', calculate);
-    });
-
-    // Run startup load
-    loadLastState();
-    renderPresets();
-    calculate();
+    addPageBtn.addEventListener('click', addCustomPage);
+    renderPages();
 </script>
 
 </body>
