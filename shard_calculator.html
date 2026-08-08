@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shard Grind Calculator</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div class="container">
+    <div class="header-row">
+        <a href="index.html" class="back-btn">← Hub</a>
+        <h2>Shard Calculator</h2>
+    </div>
+
+    <div class="input-group">
+        <label for="tickTime">Tick Time Duration</label>
+        <div class="input-row">
+            <input type="text" id="tickTime" value="1">
+            <select id="tickUnit">
+                <option value="1">Seconds</option>
+                <option value="0.001">Milliseconds (ms)</option>
+                <option value="60">Minutes</option>
+            </select>
+        </div>
+    </div>
+
+    <div class="input-group">
+        <label for="opTicks">Operation Duration (in Ticks)</label>
+        <div class="input-row">
+            <input type="text" id="opTicks" value="10">
+        </div>
+    </div>
+
+    <div class="input-group">
+        <label for="waitTicks">Cooldown / Wait (in Ticks)</label>
+        <div class="input-row">
+            <input type="text" id="waitTicks" value="5">
+        </div>
+    </div>
+
+    <div class="input-group">
+        <label for="shardGain">Shard Gain per Operation</label>
+        <div class="input-row">
+            <input type="text" id="shardGain" value="1">
+        </div>
+    </div>
+
+    <div class="input-group">
+        <label for="shardObjective">Shard Target Objective</label>
+        <div class="input-row">
+            <input type="text" id="shardObjective" value="100">
+        </div>
+    </div>
+
+    <div class="results">
+        <div class="result-main">
+            <div class="label">Total Time Required</div>
+            <div class="value" id="timeFormatted">0d 0h 0m 0s</div>
+        </div>
+
+        <div class="result-grid">
+            <div class="result-sub-item">
+                <div class="sub-label">Operations Needed</div>
+                <div class="sub-val" id="opsNeeded">0</div>
+            </div>
+            <div class="result-sub-item">
+                <div class="sub-label">Total Hours</div>
+                <div class="sub-val" id="totalHours">0.00 hrs</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="save-section">
+        <label>Presets & Saved States</label>
+        <div class="input-row">
+            <input type="text" id="presetName" placeholder="Preset name (e.g. Tier 1)">
+            <button class="btn" id="saveBtn" style="width: 100px;">Save</button>
+        </div>
+        <div class="saved-list" id="savedList"></div>
+    </div>
+
+    <div class="hint">
+        Supports inputs like: 10m, 5b, 2.5qa, 1e34
+    </div>
+</div>
+
+<script src="calculator.js"></script>
+</body>
+</html>
