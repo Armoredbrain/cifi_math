@@ -3,20 +3,6 @@ const pageFileInput = document.getElementById('newPageFile');
 const addPageBtn = document.getElementById('addPageBtn');
 const pagesList = document.getElementById('pagesList');
 
-// Default built-in calculators
-const BUILT_IN_PAGES = [
-    {
-        title: "RP Grind Calculator",
-        desc: "Big number RP time calculator with custom rates and presets",
-        file: "rp_calculator.html"
-    },
-    {
-        title: "Shard Grind Calculator",
-        desc: "Calculates tick-based operation and cooldown grind times",
-        file: "shard_calculator.html"
-    }
-];
-
 function getCustomPages() {
     try {
         return JSON.parse(localStorage.getItem('hub_custom_pages') || '[]');
@@ -41,7 +27,7 @@ function addCustomPage() {
 
     pageTitleInput.value = '';
     pageFileInput.value = '';
-    renderPages();
+    renderCustomPages();
 }
 
 function deleteCustomPage(index) {
@@ -50,31 +36,17 @@ function deleteCustomPage(index) {
     try {
         localStorage.setItem('hub_custom_pages', JSON.stringify(pages));
     } catch (e) {}
-    renderPages();
+    renderCustomPages();
 }
 
-function renderPages() {
-    pagesList.innerHTML = '';
+function renderCustomPages() {
+    // Remove previous dynamic custom items if any exist
+    document.querySelectorAll('.custom-page-item').forEach(el => el.remove());
 
-    // 1. Render Built-in Pages
-    BUILT_IN_PAGES.forEach(p => {
-        const a = document.createElement('a');
-        a.className = 'page-card';
-        a.href = p.file;
-        a.innerHTML = `
-            <div class="page-info">
-                <span class="page-title">${p.title}</span>
-                <span class="page-desc">${p.desc}</span>
-            </div>
-            <span>➔</span>
-        `;
-        pagesList.appendChild(a);
-    });
-
-    // 2. Render User Custom Pages
     const customPages = getCustomPages();
     customPages.forEach((p, idx) => {
         const container = document.createElement('div');
+        container.className = 'custom-page-item';
         container.style.display = 'flex';
         container.style.gap = '6px';
         container.style.alignItems = 'center';
@@ -106,4 +78,4 @@ if (addPageBtn) {
     addPageBtn.addEventListener('click', addCustomPage);
 }
 
-renderPages();
+renderCustomPages();
