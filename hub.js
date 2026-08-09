@@ -3,6 +3,29 @@ const pageFileInput = document.getElementById('newPageFile');
 const addPageBtn = document.getElementById('addPageBtn');
 const pagesList = document.getElementById('pagesList');
 
+const globalTickTimeInput = document.getElementById('globalTickTime');
+const globalTickUnitInput = document.getElementById('globalTickUnit');
+
+function saveGlobalTickSettings() {
+    if (!globalTickTimeInput || !globalTickUnitInput) return;
+    const settings = {
+        tickTime: globalTickTimeInput.value,
+        tickUnit: globalTickUnitInput.value
+    };
+    try {
+        localStorage.setItem('global_tick_settings', JSON.stringify(settings));
+    } catch (e) {}
+}
+
+function loadGlobalTickSettings() {
+    if (!globalTickTimeInput || !globalTickUnitInput) return;
+    try {
+        const settings = JSON.parse(localStorage.getItem('global_tick_settings') || '{}');
+        if (settings.tickTime !== undefined) globalTickTimeInput.value = settings.tickTime;
+        if (settings.tickUnit !== undefined) globalTickUnitInput.value = settings.tickUnit;
+    } catch (e) {}
+}
+
 function getCustomPages() {
     try {
         return JSON.parse(localStorage.getItem('hub_custom_pages') || '[]');
@@ -40,7 +63,6 @@ function deleteCustomPage(index) {
 }
 
 function renderCustomPages() {
-    // Remove previous dynamic custom items if any exist
     document.querySelectorAll('.custom-page-item').forEach(el => el.remove());
 
     const customPages = getCustomPages();
@@ -76,6 +98,15 @@ function renderCustomPages() {
 
 if (addPageBtn) {
     addPageBtn.addEventListener('click', addCustomPage);
+}
+
+if (globalTickTimeInput && globalTickUnitInput) {
+    [globalTickTimeInput, globalTickUnitInput].forEach(el => {
+        el.addEventListener('input', saveGlobalTickSettings);
+        el.addEventListener('change', saveGlobalTickSettings);
+        el.addEventListener('keyup', saveGlobalTickSettings);
+    });
+    loadGlobalTickSettings();
 }
 
 renderCustomPages();
