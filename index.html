@@ -4,15 +4,29 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Toolbox Hub</title>
-    <link rel="stylesheet" href="style.css?v=2">
+    <link rel="stylesheet" href="style.css?v=4">
 </head>
 <body>
 
 <div class="container">
     <h2>Toolbox Hub</h2>
 
+    <!-- Global Settings Section -->
+    <div class="save-section" style="margin-top: 0; margin-bottom: 20px; border-top: none; padding-top: 0;">
+        <label>Global Tick Settings</label>
+        <div class="input-group" style="margin-bottom: 0;">
+            <div class="input-row">
+                <input type="text" id="globalTickTime" value="1" placeholder="Tick Duration">
+                <select id="globalTickUnit">
+                    <option value="1">Seconds</option>
+                    <option value="0.001">Milliseconds (ms)</option>
+                    <option value="60">Minutes</option>
+                </select>
+            </div>
+        </div>
+    </div>
+
     <div class="pages-list" id="pagesList">
-        <!-- Core Calculators (Hardcoded fallback for zero-delay loading) -->
         <a href="rp_calculator.html" class="page-card">
             <div class="page-info">
                 <span class="page-title">RP Grind Calculator</span>
@@ -42,6 +56,6 @@
     </div>
 </div>
 
-<script src="hub.js?v=2"></script>
+<script src="hub.js?v=4"></script>
 </body>
 </html>
