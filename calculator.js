@@ -72,9 +72,20 @@ function formatTime(totalSeconds) {
     let formattedStr = '';
     if (years > 0) formattedStr += `${formatBigNumber(years)}y `;
     if (days > 0 || years > 0) formattedStr += `${days}d `;
-    formattedStr += `${hours}h ${minutes}m ${seconds}s`;
+    formattedStr += `${hours}h ${minutes}m${seconds}s`;
 
     return formattedStr;
+}
+
+function getGlobalSecPerTick() {
+    try {
+        const globalSettings = JSON.parse(localStorage.getItem('global_tick_settings') || '{}');
+        const rawTime = parseBigInput(globalSettings.tickTime || '1');
+        const mult = parseFloat(globalSettings.tickUnit || '1');
+        return rawTime * mult;
+    } catch (e) {
+        return 1;
+    }
 }
 
 // Preset Storage Helper
@@ -201,10 +212,8 @@ class PresetManager {
 // ==========================================
 // 1. RP CALCULATOR MODULE
 // ==========================================
-if (document.getElementById('tickTime')) {
+if (document.getElementById('ticksPerStudy')) {
     const inputs = {
-        tickTime: document.getElementById('tickTime'),
-        tickUnit: document.getElementById('tickUnit'),
         ticksPerStudy: document.getElementById('ticksPerStudy'),
         rpGain: document.getElementById('rpPerStudy'),
         rpRateUnit: document.getElementById('rpRateUnit'),
@@ -220,10 +229,7 @@ if (document.getElementById('tickTime')) {
     const presetMgr = new PresetManager('rp_calc', inputs, calculateRP);
 
     function calculateRP() {
-        const rawTickTime = parseBigInput(inputs.tickTime.value);
-        const tickMult = parseFloat(inputs.tickUnit.value);
-        const secPerTick = rawTickTime * tickMult;
-
+        const secPerTick = getGlobalSecPerTick();
         const ticksPerStudy = parseBigInput(inputs.ticksPerStudy.value);
         const secPerStudy = secPerTick * ticksPerStudy;
 
@@ -269,8 +275,6 @@ if (document.getElementById('tickTime')) {
 // ==========================================
 if (document.getElementById('opTicks')) {
     const inputs = {
-        tickTime: document.getElementById('tickTime'),
-        tickUnit: document.getElementById('tickUnit'),
         opTicks: document.getElementById('opTicks'),
         waitTicks: document.getElementById('waitTicks'),
         shardGain: document.getElementById('shardGain'),
@@ -286,9 +290,7 @@ if (document.getElementById('opTicks')) {
     const presetMgr = new PresetManager('shard_calc', inputs, calculateShards);
 
     function calculateShards() {
-        const rawTickTime = parseBigInput(inputs.tickTime.value);
-        const tickMult = parseFloat(inputs.tickUnit.value);
-        const secPerTick = rawTickTime * tickMult;
+        const secPerTick = getGlobalSecPerTick();
 
         const opTicks = parseBigInput(inputs.opTicks.value);
         const waitTicks = parseBigInput(inputs.waitTicks.value);
