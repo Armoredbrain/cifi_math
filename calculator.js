@@ -72,7 +72,7 @@ function formatTime(totalSeconds) {
     let formattedStr = '';
     if (years > 0) formattedStr += `${formatBigNumber(years)}y `;
     if (days > 0 || years > 0) formattedStr += `${days}d `;
-    formattedStr += `${hours}h ${minutes}m${seconds}s`;
+    formattedStr += `${hours}h ${minutes}m ${seconds}s`;
 
     return formattedStr;
 }
@@ -102,30 +102,6 @@ class PresetManager {
         if (this.saveBtn) {
             this.saveBtn.addEventListener('click', () => this.savePreset());
         }
-    }
-
-    saveLastState() {
-        try {
-            const state = {};
-            for (let key in this.inputs) {
-                state[key] = this.inputs[key].value;
-            }
-            localStorage.setItem(`${this.storageKey}_last_state`, JSON.stringify(state));
-        } catch (e) {}
-    }
-
-    loadLastState() {
-        try {
-            const last = localStorage.getItem(`${this.storageKey}_last_state`);
-            if (last) {
-                const state = JSON.parse(last);
-                for (let key in this.inputs) {
-                    if (state[key] !== undefined) {
-                        this.inputs[key].value = state[key];
-                    }
-                }
-            }
-        } catch (e) {}
     }
 
     getPresets() {
@@ -203,7 +179,6 @@ class PresetManager {
     }
 
     init() {
-        this.loadLastState();
         this.renderPresets();
     }
 }
@@ -223,10 +198,63 @@ if (document.getElementById('ticksPerStudy')) {
     const outputs = {
         studiesNeeded: document.getElementById('studiesNeeded'),
         timeFormatted: document.getElementById('timeFormatted'),
-        totalHours: document.getElementById('totalHours')
+        totalHours: document.getElementById('totalHours'),
+        bestRpValue: document.getElementById('bestRpValue')
     };
 
+    const savePeakBtn = document.getElementById('savePeakRpBtn');
+    const loadPeakBtn = document.getElementById('loadPeakRpBtn');
     const presetMgr = new PresetManager('rp_calc', inputs, calculateRP);
+
+    let currentRpPerSecond = 0;
+
+    function renderSavedPeakRP() {
+        try {
+            const stored = JSON.parse(localStorage.getItem('highest_rp_record') || '{}');
+            if (stored && stored.formatted) {
+                outputs.bestRpValue.textContent = stored.formatted;
+            } else {
+                outputs.bestRpValue.textContent = 'None Recorded';
+            }
+        } catch (e) {
+            outputs.bestRpValue.textContent = 'None Recorded';
+        }
+    }
+
+    if (savePeakBtn) {
+        savePeakBtn.addEventListener('click', () => {
+            if (currentRpPerSecond <= 0) return;
+            const record = {
+                rate: currentRpPerSecond,
+                formatted: `${formatBigNumber(currentRpPerSecond)} RP/s (${formatBigNumber(currentRpPerSecond * 60)}/m)`,
+                inputs: {
+                    ticksPerStudy: inputs.ticksPerStudy.value,
+                    rpGain: inputs.rpGain.value,
+                    rpRateUnit: inputs.rpRateUnit.value
+                }
+            };
+            try {
+                localStorage.setItem('highest_rp_record', JSON.stringify(record));
+            } catch (e) {}
+            renderSavedPeakRP();
+            savePeakBtn.textContent = '✓ Saved!';
+            setTimeout(() => { savePeakBtn.textContent = '💾 Save Current Rate'; }, 1500);
+        });
+    }
+
+    if (loadPeakBtn) {
+        loadPeakBtn.addEventListener('click', () => {
+            try {
+                const stored = JSON.parse(localStorage.getItem('highest_rp_record') || '{}');
+                if (stored && stored.inputs) {
+                    inputs.ticksPerStudy.value = stored.inputs.ticksPerStudy;
+                    inputs.rpGain.value = stored.inputs.rpGain;
+                    inputs.rpRateUnit.value = stored.inputs.rpRateUnit;
+                    calculateRP();
+                }
+            } catch (e) {}
+        });
+    }
 
     function calculateRP() {
         const secPerTick = getGlobalSecPerTick();
@@ -237,12 +265,11 @@ if (document.getElementById('ticksPerStudy')) {
         const rateType = inputs.rpRateUnit.value;
         const totalTargetRP = parseBigInput(inputs.rpObjective.value);
 
-        presetMgr.saveLastState();
-
         if (secPerStudy <= 0 || rawRpGain <= 0 || totalTargetRP <= 0) {
             outputs.studiesNeeded.textContent = '0';
             outputs.timeFormatted.textContent = '0d 0h 0m 0s';
             outputs.totalHours.textContent = '0 hrs';
+            currentRpPerSecond = 0;
             return;
         }
 
@@ -250,6 +277,8 @@ if (document.getElementById('ticksPerStudy')) {
         if (rateType === 'min') rpPerStudyCalculated = (rawRpGain / 60) * secPerStudy;
         else if (rateType === 'hr') rpPerStudyCalculated = (rawRpGain / 3600) * secPerStudy;
         else if (rateType === 'day') rpPerStudyCalculated = (rawRpGain / 86400) * secPerStudy;
+
+        currentRpPerSecond = rpPerStudyCalculated / secPerStudy;
 
         const studiesNeeded = totalTargetRP / rpPerStudyCalculated;
         const totalSeconds = studiesNeeded * secPerStudy;
@@ -266,6 +295,7 @@ if (document.getElementById('ticksPerStudy')) {
     });
 
     presetMgr.init();
+    renderSavedPeakRP();
     calculateRP();
 }
 
@@ -284,10 +314,63 @@ if (document.getElementById('opTicks')) {
     const outputs = {
         opsNeeded: document.getElementById('opsNeeded'),
         timeFormatted: document.getElementById('timeFormatted'),
-        totalHours: document.getElementById('totalHours')
+        totalHours: document.getElementById('totalHours'),
+        bestShardValue: document.getElementById('bestShardValue')
     };
 
+    const savePeakBtn = document.getElementById('savePeakShardBtn');
+    const loadPeakBtn = document.getElementById('loadPeakShardBtn');
     const presetMgr = new PresetManager('shard_calc', inputs, calculateShards);
+
+    let currentShardPerSecond = 0;
+
+    function renderSavedPeakShard() {
+        try {
+            const stored = JSON.parse(localStorage.getItem('highest_shard_record') || '{}');
+            if (stored && stored.formatted) {
+                outputs.bestShardValue.textContent = stored.formatted;
+            } else {
+                outputs.bestShardValue.textContent = 'None Recorded';
+            }
+        } catch (e) {
+            outputs.bestShardValue.textContent = 'None Recorded';
+        }
+    }
+
+    if (savePeakBtn) {
+        savePeakBtn.addEventListener('click', () => {
+            if (currentShardPerSecond <= 0) return;
+            const record = {
+                rate: currentShardPerSecond,
+                formatted: `${formatBigNumber(currentShardPerSecond)} Shards/s (${formatBigNumber(currentShardPerSecond * 60)}/m)`,
+                inputs: {
+                    opTicks: inputs.opTicks.value,
+                    waitTicks: inputs.waitTicks.value,
+                    shardGain: inputs.shardGain.value
+                }
+            };
+            try {
+                localStorage.setItem('highest_shard_record', JSON.stringify(record));
+            } catch (e) {}
+            renderSavedPeakShard();
+            savePeakBtn.textContent = '✓ Saved!';
+            setTimeout(() => { savePeakBtn.textContent = '💾 Save Current Rate'; }, 1500);
+        });
+    }
+
+    if (loadPeakBtn) {
+        loadPeakBtn.addEventListener('click', () => {
+            try {
+                const stored = JSON.parse(localStorage.getItem('highest_shard_record') || '{}');
+                if (stored && stored.inputs) {
+                    inputs.opTicks.value = stored.inputs.opTicks;
+                    inputs.waitTicks.value = stored.inputs.waitTicks;
+                    inputs.shardGain.value = stored.inputs.shardGain;
+                    calculateShards();
+                }
+            } catch (e) {}
+        });
+    }
 
     function calculateShards() {
         const secPerTick = getGlobalSecPerTick();
@@ -297,16 +380,18 @@ if (document.getElementById('opTicks')) {
         const shardGain = parseBigInput(inputs.shardGain.value);
         const shardObjective = parseBigInput(inputs.shardObjective.value);
 
-        presetMgr.saveLastState();
-
         const totalTicksPerOpCycle = opTicks + waitTicks;
 
         if (secPerTick <= 0 || totalTicksPerOpCycle <= 0 || shardGain <= 0 || shardObjective <= 0) {
             outputs.opsNeeded.textContent = '0';
             outputs.timeFormatted.textContent = '0d 0h 0m 0s';
             outputs.totalHours.textContent = '0 hrs';
+            currentShardPerSecond = 0;
             return;
         }
+
+        const cycleSeconds = totalTicksPerOpCycle * secPerTick;
+        currentShardPerSecond = shardGain / cycleSeconds;
 
         const opsNeeded = shardObjective / shardGain;
         const totalTicks = opsNeeded * totalTicksPerOpCycle;
@@ -324,5 +409,6 @@ if (document.getElementById('opTicks')) {
     });
 
     presetMgr.init();
+    renderSavedPeakShard();
     calculateShards();
 }
