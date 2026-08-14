@@ -26,6 +26,19 @@ function loadGlobalTickSettings() {
     } catch (e) {}
 }
 
+function getHighestStats() {
+    let rpStat = "No record yet";
+    let shardStat = "No record yet";
+    try {
+        const rp = JSON.parse(localStorage.getItem('highest_rp_record') || '{}');
+        if (rp && rp.formatted) rpStat = `★ Peak: ${rp.formatted}`;
+        
+        const shard = JSON.parse(localStorage.getItem('highest_shard_record') || '{}');
+        if (shard && shard.formatted) shardStat = `★ Peak: ${shard.formatted}`;
+    } catch (e) {}
+    return { rpStat, shardStat };
+}
+
 function getCustomPages() {
     try {
         return JSON.parse(localStorage.getItem('hub_custom_pages') || '[]');
@@ -50,7 +63,7 @@ function addCustomPage() {
 
     pageTitleInput.value = '';
     pageFileInput.value = '';
-    renderCustomPages();
+    renderPages();
 }
 
 function deleteCustomPage(index) {
@@ -59,16 +72,35 @@ function deleteCustomPage(index) {
     try {
         localStorage.setItem('hub_custom_pages', JSON.stringify(pages));
     } catch (e) {}
-    renderCustomPages();
+    renderPages();
 }
 
-function renderCustomPages() {
-    document.querySelectorAll('.custom-page-item').forEach(el => el.remove());
+function renderPages() {
+    const { rpStat, shardStat } = getHighestStats();
+
+    pagesList.innerHTML = `
+        <a href="rp_calculator.html" class="page-card">
+            <div class="page-info">
+                <span class="page-title">RP Grind Calculator</span>
+                <span class="page-desc">Big number RP time calculator with custom rates</span>
+                <span class="page-stat">${rpStat}</span>
+            </div>
+            <span>➔</span>
+        </a>
+
+        <a href="shard_calculator.html" class="page-card">
+            <div class="page-info">
+                <span class="page-title">Shard Grind Calculator</span>
+                <span class="page-desc">Calculates tick-based operation and cooldown times</span>
+                <span class="page-stat">${shardStat}</span>
+            </div>
+            <span>➔</span>
+        </a>
+    `;
 
     const customPages = getCustomPages();
     customPages.forEach((p, idx) => {
         const container = document.createElement('div');
-        container.className = 'custom-page-item';
         container.style.display = 'flex';
         container.style.gap = '6px';
         container.style.alignItems = 'center';
@@ -109,4 +141,4 @@ if (globalTickTimeInput && globalTickUnitInput) {
     loadGlobalTickSettings();
 }
 
-renderCustomPages();
+renderPages();
