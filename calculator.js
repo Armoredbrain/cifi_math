@@ -195,7 +195,7 @@ class StateManager {
             const delBtn = document.createElement('button');
             delBtn.className = 'btn btn-danger';
             delBtn.textContent = '✕';
-            delBtn.onclick = () => this.deletePreset(name);
+            delBtn.onclick = () => deletePreset(name);
 
             item.appendChild(loadBtn);
             item.appendChild(delBtn);
@@ -232,7 +232,12 @@ if (document.getElementById('ticksPerStudy')) {
     const loadPeakBtn = document.getElementById('loadPeakRpBtn');
     const stateMgr = new StateManager('rp_calc', inputs, calculateRP);
 
-    let currentRpPerSecond = 0;
+    function getUnitLabel(val) {
+        if (val === 'min') return '/min';
+        if (val === 'hr') return '/hr';
+        if (val === 'day') return '/day';
+        return '/study';
+    }
 
     function renderSavedPeakRP() {
         try {
@@ -249,10 +254,12 @@ if (document.getElementById('ticksPerStudy')) {
 
     if (savePeakBtn) {
         savePeakBtn.addEventListener('click', () => {
-            if (currentRpPerSecond <= 0) return;
+            const rawVal = inputs.rpGain.value.trim();
+            if (!rawVal || parseBigInput(rawVal) <= 0) return;
+
+            const unit = getUnitLabel(inputs.rpRateUnit.value);
             const record = {
-                rate: currentRpPerSecond,
-                formatted: `${formatBigNumber(currentRpPerSecond)} RP/s`,
+                formatted: `${rawVal} RP ${unit}`,
                 inputs: {
                     ticksPerStudy: inputs.ticksPerStudy.value,
                     rpGain: inputs.rpGain.value,
@@ -298,7 +305,6 @@ if (document.getElementById('ticksPerStudy')) {
             outputs.studiesNeeded.textContent = '0';
             outputs.timeFormatted.textContent = '0d 0h 0m 0s';
             outputs.totalHours.textContent = '0 hrs';
-            currentRpPerSecond = 0;
             return;
         }
 
@@ -306,8 +312,6 @@ if (document.getElementById('ticksPerStudy')) {
         if (rateType === 'min') rpPerStudyCalculated = (rawRpGain / 60) * secPerStudy;
         else if (rateType === 'hr') rpPerStudyCalculated = (rawRpGain / 3600) * secPerStudy;
         else if (rateType === 'day') rpPerStudyCalculated = (rawRpGain / 86400) * secPerStudy;
-
-        currentRpPerSecond = rpPerStudyCalculated / secPerStudy;
 
         const studiesNeeded = totalTargetRP / rpPerStudyCalculated;
         const totalSeconds = studiesNeeded * secPerStudy;
@@ -351,8 +355,6 @@ if (document.getElementById('opTicks')) {
     const loadPeakBtn = document.getElementById('loadPeakShardBtn');
     const stateMgr = new StateManager('shard_calc', inputs, calculateShards);
 
-    let currentShardPerSecond = 0;
-
     function renderSavedPeakShard() {
         try {
             const stored = JSON.parse(localStorage.getItem('highest_shard_record') || '{}');
@@ -368,10 +370,11 @@ if (document.getElementById('opTicks')) {
 
     if (savePeakBtn) {
         savePeakBtn.addEventListener('click', () => {
-            if (currentShardPerSecond <= 0) return;
+            const rawVal = inputs.shardGain.value.trim();
+            if (!rawVal || parseBigInput(rawVal) <= 0) return;
+
             const record = {
-                rate: currentShardPerSecond,
-                formatted: `${formatBigNumber(currentShardPerSecond)} Shards/s`,
+                formatted: `${rawVal} Shards / op`,
                 inputs: {
                     opTicks: inputs.opTicks.value,
                     waitTicks: inputs.waitTicks.value,
@@ -417,12 +420,8 @@ if (document.getElementById('opTicks')) {
             outputs.opsNeeded.textContent = '0';
             outputs.timeFormatted.textContent = '0d 0h 0m 0s';
             outputs.totalHours.textContent = '0 hrs';
-            currentShardPerSecond = 0;
             return;
         }
-
-        const cycleSeconds = totalTicksPerOpCycle * secPerTick;
-        currentShardPerSecond = shardGain / cycleSeconds;
 
         const opsNeeded = shardObjective / shardGain;
         const totalTicks = opsNeeded * totalTicksPerOpCycle;
