@@ -88,8 +88,8 @@ function getGlobalSecPerTick() {
     }
 }
 
-// Preset Storage Helper
-class PresetManager {
+// Preset and State Storage Helper
+class StateManager {
     constructor(storageKey, inputs, onCalculate) {
         this.storageKey = storageKey;
         this.inputs = inputs;
@@ -102,6 +102,30 @@ class PresetManager {
         if (this.saveBtn) {
             this.saveBtn.addEventListener('click', () => this.savePreset());
         }
+    }
+
+    saveCurrentState() {
+        try {
+            const state = {};
+            for (let key in this.inputs) {
+                state[key] = this.inputs[key].value;
+            }
+            localStorage.setItem(`${this.storageKey}_last_state`, JSON.stringify(state));
+        } catch (e) {}
+    }
+
+    loadCurrentState() {
+        try {
+            const last = localStorage.getItem(`${this.storageKey}_last_state`);
+            if (last) {
+                const state = JSON.parse(last);
+                for (let key in this.inputs) {
+                    if (state[key] !== undefined) {
+                        this.inputs[key].value = state[key];
+                    }
+                }
+            }
+        } catch (e) {}
     }
 
     getPresets() {
@@ -140,6 +164,7 @@ class PresetManager {
                     this.inputs[key].value = p[key];
                 }
             }
+            this.saveCurrentState();
             this.onCalculate();
         }
     }
@@ -179,6 +204,7 @@ class PresetManager {
     }
 
     init() {
+        this.loadCurrentState();
         this.renderPresets();
     }
 }
@@ -204,7 +230,7 @@ if (document.getElementById('ticksPerStudy')) {
 
     const savePeakBtn = document.getElementById('savePeakRpBtn');
     const loadPeakBtn = document.getElementById('loadPeakRpBtn');
-    const presetMgr = new PresetManager('rp_calc', inputs, calculateRP);
+    const stateMgr = new StateManager('rp_calc', inputs, calculateRP);
 
     let currentRpPerSecond = 0;
 
@@ -226,7 +252,7 @@ if (document.getElementById('ticksPerStudy')) {
             if (currentRpPerSecond <= 0) return;
             const record = {
                 rate: currentRpPerSecond,
-                formatted: `${formatBigNumber(currentRpPerSecond)} RP/s (${formatBigNumber(currentRpPerSecond * 60)}/m)`,
+                formatted: `${formatBigNumber(currentRpPerSecond)} RP/s`,
                 inputs: {
                     ticksPerStudy: inputs.ticksPerStudy.value,
                     rpGain: inputs.rpGain.value,
@@ -250,6 +276,7 @@ if (document.getElementById('ticksPerStudy')) {
                     inputs.ticksPerStudy.value = stored.inputs.ticksPerStudy;
                     inputs.rpGain.value = stored.inputs.rpGain;
                     inputs.rpRateUnit.value = stored.inputs.rpRateUnit;
+                    stateMgr.saveCurrentState();
                     calculateRP();
                 }
             } catch (e) {}
@@ -257,6 +284,8 @@ if (document.getElementById('ticksPerStudy')) {
     }
 
     function calculateRP() {
+        stateMgr.saveCurrentState();
+
         const secPerTick = getGlobalSecPerTick();
         const ticksPerStudy = parseBigInput(inputs.ticksPerStudy.value);
         const secPerStudy = secPerTick * ticksPerStudy;
@@ -294,7 +323,7 @@ if (document.getElementById('ticksPerStudy')) {
         el.addEventListener('change', calculateRP);
     });
 
-    presetMgr.init();
+    stateMgr.init();
     renderSavedPeakRP();
     calculateRP();
 }
@@ -320,7 +349,7 @@ if (document.getElementById('opTicks')) {
 
     const savePeakBtn = document.getElementById('savePeakShardBtn');
     const loadPeakBtn = document.getElementById('loadPeakShardBtn');
-    const presetMgr = new PresetManager('shard_calc', inputs, calculateShards);
+    const stateMgr = new StateManager('shard_calc', inputs, calculateShards);
 
     let currentShardPerSecond = 0;
 
@@ -342,7 +371,7 @@ if (document.getElementById('opTicks')) {
             if (currentShardPerSecond <= 0) return;
             const record = {
                 rate: currentShardPerSecond,
-                formatted: `${formatBigNumber(currentShardPerSecond)} Shards/s (${formatBigNumber(currentShardPerSecond * 60)}/m)`,
+                formatted: `${formatBigNumber(currentShardPerSecond)} Shards/s`,
                 inputs: {
                     opTicks: inputs.opTicks.value,
                     waitTicks: inputs.waitTicks.value,
@@ -366,6 +395,7 @@ if (document.getElementById('opTicks')) {
                     inputs.opTicks.value = stored.inputs.opTicks;
                     inputs.waitTicks.value = stored.inputs.waitTicks;
                     inputs.shardGain.value = stored.inputs.shardGain;
+                    stateMgr.saveCurrentState();
                     calculateShards();
                 }
             } catch (e) {}
@@ -373,8 +403,9 @@ if (document.getElementById('opTicks')) {
     }
 
     function calculateShards() {
-        const secPerTick = getGlobalSecPerTick();
+        stateMgr.saveCurrentState();
 
+        const secPerTick = getGlobalSecPerTick();
         const opTicks = parseBigInput(inputs.opTicks.value);
         const waitTicks = parseBigInput(inputs.waitTicks.value);
         const shardGain = parseBigInput(inputs.shardGain.value);
@@ -408,7 +439,7 @@ if (document.getElementById('opTicks')) {
         el.addEventListener('change', calculateShards);
     });
 
-    presetMgr.init();
+    stateMgr.init();
     renderSavedPeakShard();
     calculateShards();
 }
