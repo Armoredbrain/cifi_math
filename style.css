@@ -2,6 +2,7 @@
     --bg-color: #0f172a;
     --card-bg: #1e293b;
     --accent: #38bdf8;
+    --gold: #f59e0b;
     --danger: #ef4444;
     --text-main: #f8fafc;
     --text-muted: #94a3b8;
@@ -36,7 +37,7 @@ body {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 20px;
+    margin-bottom: 16px;
 }
 
 .back-btn {
@@ -47,7 +48,7 @@ body {
 }
 
 h2 {
-    margin: 0 0 20px 0;
+    margin: 0 0 16px 0;
     font-size: 1.3rem;
     color: var(--accent);
     text-align: center;
@@ -55,6 +56,69 @@ h2 {
 
 .header-row h2 {
     margin: 0;
+}
+
+/* Peak Record Banner */
+.best-banner {
+    background-color: rgba(245, 158, 11, 0.1);
+    border: 1px solid var(--gold);
+    border-radius: 12px;
+    padding: 12px 14px;
+    margin-bottom: 18px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.best-banner-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.best-banner-label {
+    font-size: 0.72rem;
+    color: var(--gold);
+    text-transform: uppercase;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+}
+
+.best-banner-value {
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: var(--text-main);
+}
+
+.best-banner-actions {
+    display: flex;
+    gap: 8px;
+}
+
+.btn-record {
+    flex: 1;
+    font-size: 0.78rem;
+    padding: 8px 10px;
+    border-radius: 6px;
+    font-weight: 600;
+    cursor: pointer;
+    border: none;
+    text-align: center;
+}
+
+.btn-save-record {
+    background: var(--gold);
+    color: #1e1b4b;
+}
+
+.btn-load-record {
+    background: var(--input-bg);
+    color: var(--text-main);
+    border: 1px solid var(--border);
+}
+
+.btn-save-record:active, .btn-load-record:active {
+    opacity: 0.8;
 }
 
 .input-group {
@@ -174,6 +238,13 @@ input:focus, select:focus {
     font-size: 0.8rem;
     color: var(--text-muted);
     margin-top: 2px;
+}
+
+.page-stat {
+    font-size: 0.75rem;
+    color: var(--gold);
+    margin-top: 4px;
+    font-weight: 600;
 }
 
 /* Calculator Specifics */
