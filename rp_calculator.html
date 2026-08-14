@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>RP Grind Calculator</title>
-    <link rel="stylesheet" href="style.css?v=4">
+    <link rel="stylesheet" href="style.css?v=7">
 </head>
 <body>
 
@@ -12,6 +12,18 @@
     <div class="header-row">
         <a href="index.html" class="back-btn">← Hub</a>
         <h2>RP Calculator</h2>
+    </div>
+
+    <!-- Manual Peak Rate Banner with Save Button -->
+    <div class="best-banner">
+        <div class="best-banner-header">
+            <span class="best-banner-label">★ Highest RP Gen Saved</span>
+        </div>
+        <div class="best-banner-value" id="bestRpValue">None Recorded</div>
+        <div class="best-banner-actions">
+            <button class="btn-record btn-save-record" id="savePeakRpBtn">💾 Save Current Rate</button>
+            <button class="btn-record btn-load-record" id="loadPeakRpBtn">Load Setup</button>
+        </div>
     </div>
 
     <div class="input-group">
@@ -73,6 +85,6 @@
     </div>
 </div>
 
-<script src="calculator.js?v=4"></script>
+<script src="calculator.js?v=7"></script>
 </body>
 </html>
