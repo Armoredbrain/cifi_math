@@ -27,14 +27,14 @@ function loadGlobalTickSettings() {
 }
 
 function getHighestStats() {
-    let rpStat = "No record yet";
-    let shardStat = "No record yet";
+    let rpStat = "No saved rate";
+    let shardStat = "No saved rate";
     try {
         const rp = JSON.parse(localStorage.getItem('highest_rp_record') || '{}');
-        if (rp && rp.formatted) rpStat = `★ Peak: ${rp.formatted}`;
+        if (rp && rp.formatted) rpStat = `Saved: ${rp.formatted}`;
         
         const shard = JSON.parse(localStorage.getItem('highest_shard_record') || '{}');
-        if (shard && shard.formatted) shardStat = `★ Peak: ${shard.formatted}`;
+        if (shard && shard.formatted) shardStat = `Saved: ${shard.formatted}`;
     } catch (e) {}
     return { rpStat, shardStat };
 }
@@ -93,6 +93,14 @@ function renderPages() {
                 <span class="page-title">Shard Grind Calculator</span>
                 <span class="page-desc">Calculates tick-based operation and cooldown times</span>
                 <span class="page-stat">${shardStat}</span>
+            </div>
+            <span>➔</span>
+        </a>
+
+        <a href="dog_food_calculator.html" class="page-card">
+            <div class="page-info">
+                <span class="page-title">Ration Croquettes Chien</span>
+                <span class="page-desc">Dose journalière et par repas selon l'âge et le poids adulte</span>
             </div>
             <span>➔</span>
         </a>
