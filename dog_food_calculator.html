@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calculateur Ration Chien</title>
+    <link rel="stylesheet" href="style.css?v=9">
+</head>
+<body>
+
+<div class="container">
+    <div class="header-row">
+        <a href="index.html" class="back-btn">← Hub</a>
+        <h2>Ration Croquettes</h2>
+    </div>
+
+    <div class="input-group">
+        <label for="adultWeight">Poids adulte estimé (kg)</label>
+        <div class="input-row">
+            <input type="number" id="adultWeight" value="37.5" min="1" max="90" step="0.5">
+        </div>
+    </div>
+
+    <div class="input-group">
+        <label for="age">Âge du chien (mois)</label>
+        <div class="input-row">
+            <input type="number" id="age" value="5" min="1.5" max="24" step="0.5">
+        </div>
+    </div>
+
+    <div class="input-group">
+        <label for="meals">Nombre de repas par jour</label>
+        <div class="input-row">
+            <select id="meals">
+                <option value="1">1 repas / jour</option>
+                <option value="2">2 repas / jour</option>
+                <option value="3" selected>3 repas / jour (≤ 6 mois)</option>
+                <option value="4">4 repas / jour</option>
+            </select>
+        </div>
+    </div>
+
+    <div class="results">
+        <div class="result-main">
+            <div class="label">Dose par repas</div>
+            <div class="value" id="perMeal">0 g</div>
+        </div>
+
+        <div class="result-grid">
+            <div class="result-sub-item" style="grid-column: span 2;">
+                <div class="sub-label">Ration journalière totale</div>
+                <div class="sub-val" id="dailyTotal">0 g/jour</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="save-section">
+        <label>Profils & Sauvegardes</label>
+        <div class="input-row">
+            <input type="text" id="presetName" placeholder="Nom (ex: Max 5 mois)">
+            <button class="btn" id="saveBtn" style="width: 100px;">Save</button>
+        </div>
+        <div class="saved-list" id="savedList"></div>
+    </div>
+
+    <div class="hint">
+        💧 Distribuez les croquettes sèches avec de l'eau fraîche à disposition.
+    </div>
+</div>
+
+<script src="calculator.js?v=9"></script>
+</body>
+</html>
