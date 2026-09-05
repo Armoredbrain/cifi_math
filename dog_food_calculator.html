@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Calculateur Ration Chien</title>
-    <link rel="stylesheet" href="style.css?v=11">
+    <link rel="stylesheet" href="style.css?v=12">
 </head>
 <body>
 
@@ -41,14 +41,24 @@
         </div>
     </div>
 
-    <!-- Transition Slider -->
-    <div id="transitionGroup" class="input-group" style="background: var(--input-bg); padding: 12px; border-radius: 8px; border: 1px solid var(--border);">
-        <label for="transitionDay" style="display:flex; justify-content:space-between;">
-            <span>Jour de transition :</span>
+    <div id="transitionGroup" class="input-group" style="background: var(--input-bg); padding: 14px; border-radius: 8px; border: 1px solid var(--border);">
+        <label for="startDate">Date de début de transition</label>
+        <div class="input-row" style="margin-bottom: 12px;">
+            <input type="date" id="startDate" style="width: 100%;">
+        </div>
+
+        <label for="targetDate">Date affichée (par défaut : Aujourd'hui)</label>
+        <div class="input-row" style="margin-bottom: 12px;">
+            <input type="date" id="targetDate" style="width: 100%;">
+        </div>
+
+        <label for="transitionDay" style="display:flex; justify-content:space-between; margin-bottom: 4px;">
+            <span>Progression :</span>
             <strong id="transitionDayLabel" style="color:var(--accent);">Jour 0</strong>
         </label>
         <input type="range" id="transitionDay" min="0" max="17" value="0" style="width: 100%; margin: 8px 0;">
-        <span class="hint" style="margin-top: 2px; text-align: left; display: block;">
+
+        <span class="hint" style="margin-top: 4px; text-align: left; display: block;">
             Midi: -10g/j | Matin: +5g/j | Soir: +5g/j
         </span>
     </div>
@@ -56,7 +66,7 @@
     <div class="results">
         <div class="result-main">
             <div class="label" id="mainResultLabel">Détail des portions</div>
-            <div class="value" id="perMeal" style="font-size: 1.25rem;">-</div>
+            <div class="value" id="perMeal" style="font-size: 1.15rem; line-height: 1.4;">-</div>
         </div>
 
         <div class="result-grid">
@@ -70,7 +80,7 @@
     <div class="save-section">
         <label>Profils & Sauvegardes</label>
         <div class="input-row">
-            <input type="text" id="presetName" placeholder="Nom (ex: Max transition J5)">
+            <input type="text" id="presetName" placeholder="Nom (ex: Max transition)">
             <button class="btn" id="saveBtn" style="width: 100px;">Save</button>
         </div>
         <div class="saved-list" id="savedList"></div>
@@ -81,6 +91,6 @@
     </div>
 </div>
 
-<script src="calculator.js?v=11"></script>
+<script src="calculator.js?v=12"></script>
 </body>
 </html>
