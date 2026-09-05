@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Calculateur Ration Chien</title>
-    <link rel="stylesheet" href="style.css?v=9">
+    <link rel="stylesheet" href="style.css?v=11">
 </head>
 <body>
 
@@ -29,21 +29,34 @@
     </div>
 
     <div class="input-group">
-        <label for="meals">Nombre de repas par jour</label>
+        <label for="meals">Mode de repas</label>
         <div class="input-row">
             <select id="meals">
                 <option value="1">1 repas / jour</option>
                 <option value="2">2 repas / jour</option>
-                <option value="3" selected>3 repas / jour (≤ 6 mois)</option>
+                <option value="3">3 repas / jour</option>
                 <option value="4">4 repas / jour</option>
+                <option value="transition" selected>Transition (3 → 2 repas)</option>
             </select>
         </div>
     </div>
 
+    <!-- Transition Slider -->
+    <div id="transitionGroup" class="input-group" style="background: var(--input-bg); padding: 12px; border-radius: 8px; border: 1px solid var(--border);">
+        <label for="transitionDay" style="display:flex; justify-content:space-between;">
+            <span>Jour de transition :</span>
+            <strong id="transitionDayLabel" style="color:var(--accent);">Jour 0</strong>
+        </label>
+        <input type="range" id="transitionDay" min="0" max="17" value="0" style="width: 100%; margin: 8px 0;">
+        <span class="hint" style="margin-top: 2px; text-align: left; display: block;">
+            Midi: -10g/j | Matin: +5g/j | Soir: +5g/j
+        </span>
+    </div>
+
     <div class="results">
         <div class="result-main">
-            <div class="label">Dose par repas</div>
-            <div class="value" id="perMeal">0 g</div>
+            <div class="label" id="mainResultLabel">Détail des portions</div>
+            <div class="value" id="perMeal" style="font-size: 1.25rem;">-</div>
         </div>
 
         <div class="result-grid">
@@ -57,7 +70,7 @@
     <div class="save-section">
         <label>Profils & Sauvegardes</label>
         <div class="input-row">
-            <input type="text" id="presetName" placeholder="Nom (ex: Max 5 mois)">
+            <input type="text" id="presetName" placeholder="Nom (ex: Max transition J5)">
             <button class="btn" id="saveBtn" style="width: 100px;">Save</button>
         </div>
         <div class="saved-list" id="savedList"></div>
@@ -68,6 +81,6 @@
     </div>
 </div>
 
-<script src="calculator.js?v=9"></script>
+<script src="calculator.js?v=11"></script>
 </body>
 </html>
