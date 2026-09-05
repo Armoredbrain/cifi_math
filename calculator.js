@@ -42,48 +42,51 @@ if (document.getElementById('adultWeight')) {
         return `${year}-${month}-${day}`;
     }
 
-    const inputs = {
-        adultWeight: document.getElementById('adultWeight'),
-        age: document.getElementById('age'),
-        meals: document.getElementById('meals'),
-        startDate: document.getElementById('startDate'),
-        targetDate: document.getElementById('targetDate')
-    };
+    const adultWeightInput = document.getElementById('adultWeight');
+    const ageInput = document.getElementById('age');
+    const mealsInput = document.getElementById('meals');
+    const startDateInput = document.getElementById('startDate');
+    const targetDateInput = document.getElementById('targetDate');
 
     const transitionGroup = document.getElementById('transitionGroup');
     const transitionStatus = document.getElementById('transitionStatus');
     const standardResultBox = document.getElementById('standardResultBox');
     const transitionResultGrid = document.getElementById('transitionResultGrid');
 
-    const outputs = {
-        dailyTotal: document.getElementById('dailyTotal'),
-        perMeal: document.getElementById('perMeal'),
-        morningVal: document.getElementById('morningVal'),
-        lunchVal: document.getElementById('lunchVal'),
-        eveningVal: document.getElementById('eveningVal')
-    };
+    const dailyTotalEl = document.getElementById('dailyTotal');
+    const perMealEl = document.getElementById('perMeal');
+    const morningValEl = document.getElementById('morningVal');
+    const lunchValEl = document.getElementById('lunchVal');
+    const eveningValEl = document.getElementById('eveningVal');
 
-    // Pre-fill default dates
-    if (!inputs.startDate.value) inputs.startDate.value = getTodayString();
-    if (!inputs.targetDate.value) inputs.targetDate.value = getTodayString();
+    if (!startDateInput.value) startDateInput.value = getTodayString();
+    if (!targetDateInput.value) targetDateInput.value = getTodayString();
+
+    const inputs = {
+        adultWeight: adultWeightInput,
+        age: ageInput,
+        meals: mealsInput,
+        startDate: startDateInput,
+        targetDate: targetDateInput
+    };
 
     const stateMgr = new StateManager('dog_food_calc', inputs, calculateDogFood);
 
     function calculateDogFood() {
         stateMgr.saveCurrentState();
 
-        const weight = parseFloat(inputs.adultWeight.value) || 0;
-        const age = parseFloat(inputs.age.value) || 0;
-        const mode = inputs.meals.value;
+        const weight = parseFloat(adultWeightInput.value) || 0;
+        const age = parseFloat(ageInput.value) || 0;
+        const mode = mealsInput.value;
 
         if (weight <= 0 || age <= 0) {
-            outputs.dailyTotal.textContent = '0 g/jour';
-            outputs.perMeal.textContent = '0 g';
+            dailyTotalEl.textContent = '0 g/jour';
+            perMealEl.textContent = '0 g';
             return;
         }
 
         const totalDaily = Math.round(calculateRation(weight, age));
-        outputs.dailyTotal.textContent = `${totalDaily} g/jour`;
+        dailyTotalEl.textContent = `${totalDaily} g/jour`;
 
         if (mode === 'transition') {
             transitionGroup.style.display = 'block';
@@ -93,17 +96,16 @@ if (document.getElementById('adultWeight')) {
             const baseLunch = Math.round(totalDaily / 3);
             const maxDays = Math.ceil(baseLunch / 10);
 
-            // Compute day index from dates (UTC midnight to eliminate DST shift)
             let dayIndex = 0;
-            if (inputs.startDate.value && inputs.targetDate.value) {
-                const s = new Date(inputs.startDate.value + 'T00:00:00');
-                const t = new Date(inputs.targetDate.value + 'T00:00:00');
+            if (startDateInput.value && targetDateInput.value) {
+                const s = new Date(startDateInput.value + 'T00:00:00');
+                const t = new Date(targetDateInput.value + 'T00:00:00');
                 dayIndex = Math.round((t - s) / 86400000);
             }
 
             if (dayIndex <= 0) {
                 dayIndex = 0;
-                transitionStatus.textContent = `Jour 0 (Début - 3 repas égaux)`;
+                transitionStatus.textContent = 'Jour 0 (Début - 3 repas égaux)';
             } else if (dayIndex >= maxDays) {
                 dayIndex = maxDays;
                 transitionStatus.textContent = `Jour ${maxDays} (Transition terminée - 2 repas)`;
@@ -115,27 +117,27 @@ if (document.getElementById('adultWeight')) {
             const morning = Math.round(baseLunch + (dayIndex * 5));
             const evening = totalDaily - morning - lunch;
 
-            outputs.morningVal.textContent = `${morning} g`;
-            outputs.lunchVal.textContent = `${lunch} g`;
-            outputs.eveningVal.textContent = `${evening} g`;
+            morningValEl.textContent = `${morning} g`;
+            lunchValEl.textContent = `${lunch} g`;
+            eveningValEl.textContent = `${evening} g`;
         } else {
             transitionGroup.style.display = 'none';
             standardResultBox.style.display = 'block';
             transitionResultGrid.style.display = 'none';
 
-            const meals = parseInt(mode) || 1;
-            const perMeal = Math.round(totalDaily / meals);
-            outputs.perMeal.textContent = `${perMeal} g`;
+            const mealCount = parseInt(mode) || 1;
+            const perMeal = Math.round(totalDaily / mealCount);
+            perMealEl.textContent = `${perMeal} g`;
         }
     }
 
-    [inputs.adultWeight, inputs.age].forEach(el => {
+    [adultWeightInput, ageInput].forEach(el => {
         el.addEventListener('input', calculateDogFood);
         el.addEventListener('change', calculateDogFood);
         el.addEventListener('keyup', calculateDogFood);
     });
 
-    [inputs.meals, inputs.startDate, inputs.targetDate].forEach(el => {
+    [mealsInput, startDateInput, targetDateInput].forEach(el => {
         el.addEventListener('change', calculateDogFood);
         el.addEventListener('input', calculateDogFood);
     });
