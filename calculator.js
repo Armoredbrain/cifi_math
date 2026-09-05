@@ -51,43 +51,23 @@ if (document.getElementById('adultWeight')) {
     };
 
     const transitionGroup = document.getElementById('transitionGroup');
-    const transitionDay = document.getElementById('transitionDay');
-    const transitionDayLabel = document.getElementById('transitionDayLabel');
+    const transitionStatus = document.getElementById('transitionStatus');
+    const standardResultBox = document.getElementById('standardResultBox');
+    const transitionResultGrid = document.getElementById('transitionResultGrid');
 
     const outputs = {
         dailyTotal: document.getElementById('dailyTotal'),
         perMeal: document.getElementById('perMeal'),
-        mainLabel: document.getElementById('mainResultLabel')
+        morningVal: document.getElementById('morningVal'),
+        lunchVal: document.getElementById('lunchVal'),
+        eveningVal: document.getElementById('eveningVal')
     };
 
-    // Initialize default dates if blank
+    // Pre-fill default dates
     if (!inputs.startDate.value) inputs.startDate.value = getTodayString();
     if (!inputs.targetDate.value) inputs.targetDate.value = getTodayString();
 
     const stateMgr = new StateManager('dog_food_calc', inputs, calculateDogFood);
-
-    function syncDateToSlider() {
-        if (!inputs.startDate.value || !inputs.targetDate.value) return;
-        const start = new Date(inputs.startDate.value);
-        const target = new Date(inputs.targetDate.value);
-        const diffDays = Math.round((target - start) / (1000 * 60 * 60 * 24));
-
-        const max = parseInt(transitionDay.max) || 17;
-        const clampedDay = Math.max(0, Math.min(diffDays, max));
-        transitionDay.value = clampedDay;
-    }
-
-    function syncSliderToDate() {
-        if (!inputs.startDate.value) return;
-        const start = new Date(inputs.startDate.value);
-        const dayOffset = parseInt(transitionDay.value) || 0;
-        const target = new Date(start.getTime() + dayOffset * 86400000);
-
-        const y = target.getFullYear();
-        const m = String(target.getMonth() + 1).padStart(2, '0');
-        const d = String(target.getDate()).padStart(2, '0');
-        inputs.targetDate.value = `${y}-${m}-${d}`;
-    }
 
     function calculateDogFood() {
         stateMgr.saveCurrentState();
@@ -107,61 +87,59 @@ if (document.getElementById('adultWeight')) {
 
         if (mode === 'transition') {
             transitionGroup.style.display = 'block';
+            standardResultBox.style.display = 'none';
+            transitionResultGrid.style.display = 'grid';
 
             const baseLunch = Math.round(totalDaily / 3);
             const maxDays = Math.ceil(baseLunch / 10);
-            transitionDay.max = maxDays;
 
-            const day = parseInt(transitionDay.value) || 0;
-            transitionDayLabel.textContent = day === 0 ? `Jour 0 (Départ)` : `Jour ${day} / ${maxDays}`;
+            // Compute day index from dates (UTC midnight to eliminate DST shift)
+            let dayIndex = 0;
+            if (inputs.startDate.value && inputs.targetDate.value) {
+                const s = new Date(inputs.startDate.value + 'T00:00:00');
+                const t = new Date(inputs.targetDate.value + 'T00:00:00');
+                dayIndex = Math.round((t - s) / 86400000);
+            }
 
-            // Deduct 10g per day from lunch, add 5g per day to morning & evening
-            const lunch = Math.max(0, baseLunch - (day * 10));
-            const morning = Math.round(baseLunch + (day * 5));
+            if (dayIndex <= 0) {
+                dayIndex = 0;
+                transitionStatus.textContent = `Jour 0 (Début - 3 repas égaux)`;
+            } else if (dayIndex >= maxDays) {
+                dayIndex = maxDays;
+                transitionStatus.textContent = `Jour ${maxDays} (Transition terminée - 2 repas)`;
+            } else {
+                transitionStatus.textContent = `Jour ${dayIndex} sur ${maxDays}`;
+            }
+
+            const lunch = Math.max(0, baseLunch - (dayIndex * 10));
+            const morning = Math.round(baseLunch + (dayIndex * 5));
             const evening = totalDaily - morning - lunch;
 
-            outputs.mainLabel.textContent = `Portions (${inputs.targetDate.value || 'Date'})`;
-            outputs.perMeal.innerHTML = `Matin: <strong>${morning}g</strong> | Midi: <strong>${lunch}g</strong> | Soir: <strong>${evening}g</strong>`;
+            outputs.morningVal.textContent = `${morning} g`;
+            outputs.lunchVal.textContent = `${lunch} g`;
+            outputs.eveningVal.textContent = `${evening} g`;
         } else {
             transitionGroup.style.display = 'none';
+            standardResultBox.style.display = 'block';
+            transitionResultGrid.style.display = 'none';
+
             const meals = parseInt(mode) || 1;
             const perMeal = Math.round(totalDaily / meals);
-            outputs.mainLabel.textContent = "Dose par repas";
-            outputs.perMeal.textContent = `${perMeal} g / repas`;
+            outputs.perMeal.textContent = `${perMeal} g`;
         }
     }
 
-    // Input listeners
-    ['input', 'change', 'keyup'].forEach(evt => {
-        inputs.adultWeight.addEventListener(evt, calculateDogFood);
-        inputs.age.addEventListener(evt, calculateDogFood);
+    [inputs.adultWeight, inputs.age].forEach(el => {
+        el.addEventListener('input', calculateDogFood);
+        el.addEventListener('change', calculateDogFood);
+        el.addEventListener('keyup', calculateDogFood);
     });
 
-    inputs.meals.addEventListener('change', calculateDogFood);
-
-    // Date changes update slider position then recalculate
-    inputs.startDate.addEventListener('change', () => {
-        syncDateToSlider();
-        calculateDogFood();
-    });
-
-    inputs.targetDate.addEventListener('change', () => {
-        syncDateToSlider();
-        calculateDogFood();
-    });
-
-    // Slider movements update target date then recalculate
-    transitionDay.addEventListener('input', () => {
-        syncSliderToDate();
-        calculateDogFood();
-    });
-
-    transitionDay.addEventListener('change', () => {
-        syncSliderToDate();
-        calculateDogFood();
+    [inputs.meals, inputs.startDate, inputs.targetDate].forEach(el => {
+        el.addEventListener('change', calculateDogFood);
+        el.addEventListener('input', calculateDogFood);
     });
 
     stateMgr.init();
-    syncDateToSlider();
     calculateDogFood();
 }
